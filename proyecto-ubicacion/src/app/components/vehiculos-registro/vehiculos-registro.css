@@ -1,0 +1,218 @@
+/* ===== VARIABLES ===== */
+:root {
+  --verde: #2e7d32;
+  --verde-oscuro: #1b5e20;
+  --verde-focus: rgba(46, 125, 50, 0.18);
+  --gris-texto: #555;
+  --gris-borde: #dcdcdc;
+  --gris-suave: #f5f7f8;
+}
+
+/* ===== CONTENEDOR GENERAL ===== */
+.vehiculos-container {
+  width: 95%;
+  max-width: 700px;
+  margin: 50px auto;
+  padding: 10px 0 40px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ===== TÍTULO ===== */
+.titulo {
+  text-align: center;
+  font-size: 28px;
+  color: var(--verde);
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.subtitulo {
+  text-align: center;
+  color: #6b6b6b;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+/* ===== CARD FORMULARIO ===== */
+.form-card {
+  max-width: 550px;
+  margin: auto;
+  padding: 30px 28px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  animation: fadeInUp 0.3s ease;
+}
+
+/* ===== FORMULARIO ===== */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ===== FLOATING INPUTS ===== */
+.floating {
+  position: relative;
+  display: block;
+}
+
+.floating input {
+  width: 100%;
+  padding: 16px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--gris-borde);
+  background: #fff;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.floating input:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px var(--verde-focus);
+  outline: none;
+}
+
+.floating span {
+  position: absolute;
+  left: 14px;
+  top: 16px;
+  color: #7a7a7a;
+  font-size: 14px;
+  pointer-events: none;
+  transition: all 0.18s ease;
+  background: #fff;
+  padding: 0 5px;
+}
+
+/* Animación floating */
+.floating input:focus + span,
+.floating input:not(:placeholder-shown) + span {
+  top: -8px;
+  font-size: 11px;
+  color: var(--verde);
+  font-weight: 600;
+}
+
+/* ===== BOTONES ===== */
+.btn {
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Botón principal */
+.btn.primary {
+  width: 100%;
+  background: var(--verde);
+  color: white;
+  font-size: 15px;
+  padding: 14px;
+  letter-spacing: 0.5px;
+}
+
+.btn.primary:hover {
+  background: var(--verde-oscuro);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(27, 94, 32, 0.25);
+}
+
+/* Botón secundario */
+.btn.secondary {
+  width: 100%;
+  background: #f1f1f1;
+  color: #444;
+  font-size: 14px;
+  padding: 12px;
+}
+
+.btn.secondary:hover {
+  background: #e0e0e0;
+}
+
+/* ===== MODALES ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.25s ease;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  width: 90%;
+  max-width: 380px;
+  padding: 28px;
+  border-radius: 16px;
+  text-align: center;
+  animation: scaleIn 0.25s ease;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+}
+
+.modal h3 {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.modal.success h3 {
+  color: var(--verde);
+}
+
+.modal.error h3 {
+  color: #c62828;
+}
+
+.modal p {
+  font-size: 14px;
+  color: var(--gris-texto);
+  margin-bottom: 20px;
+}
+
+.btn.ok {
+  background: var(--verde);
+  color: white;
+  padding: 10px 20px;
+}
+
+.btn.ok:hover {
+  background: var(--verde-oscuro);
+}
+
+.btn.cancel {
+  background: #eeeeee;
+  color: #444;
+  padding: 10px 20px;
+}
+
+.btn.cancel:hover {
+  background: #d4d4d4;
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.header-actions button {
+  z-index: 10;
+  pointer-events: auto;
+}

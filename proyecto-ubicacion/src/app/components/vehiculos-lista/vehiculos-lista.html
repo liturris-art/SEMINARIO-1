@@ -1,0 +1,106 @@
+<div class="vehiculos-container">
+
+  <!-- ENCABEZADO -->
+  <div class="header">
+    <div>
+      <h2 class="titulo">Gestión de Vehículos</h2>
+      <p class="subtitulo">Administra los vehículos registrados en el sistema</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn primary" (click)="crearVehiculo()">
+        + Nuevo Vehículo
+      </button>
+      <button class="btn secondary" (click)="obtenerVehiculos()">
+        Recargar
+      </button>
+      <button class="btn secondary" (click)="gotoRutas()">
+        Ver Rutas
+      </button>
+    </div>
+  </div>
+
+  <!-- ESTADO DE CARGA -->
+  <div *ngIf="cargando" class="alert info">
+    Cargando vehículos...
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="error" class="alert error">
+    {{ error }}
+  </div>
+
+  <!-- TABLA -->
+  <div class="card" *ngIf="!cargando && !error">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Placa</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Estado</th>
+          <th class="acciones-col">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let v of vehiculos">
+          <td>{{ v.id }}</td>
+          <td class="placa">{{ v.placa }}</td>
+          <td>{{ v.marca }}</td>
+          <td>{{ v.modelo }}</td>
+
+          <td>
+            <span 
+              class="tag"
+              [class.activo]="v.activo"
+              [class.inactivo]="!v.activo">
+              {{ v.activo ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+
+          <td class="acciones">
+            <button class="btn edit" (click)="actualizarVehiculo(v.id)">
+              Editar
+            </button>
+            <button class="btn delete" (click)="eliminarVehiculo(v.id!)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+
+        <!-- Estado vacío -->
+        <tr *ngIf="vehiculos.length === 0">
+          <td colspan="6" class="empty">
+            No hay vehículos registrados.
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MODAL CONFIRMACIÓN -->
+  <div class="modal-overlay" *ngIf="modalConfirmVisible">
+    <div class="modal">
+      <h3>Confirmar Eliminación</h3>
+      <p>¿Estás seguro de eliminar este vehículo? Esta acción no se puede deshacer.</p>
+
+      <div class="modal-btns">
+        <button class="btn cancel" (click)="cerrarConfirm()">Cancelar</button>
+        <button class="btn delete" (click)="confirmarEliminacion()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ÉXITO -->
+  <div class="modal-overlay" *ngIf="modalSuccessVisible">
+    <div class="modal success">
+      <h3>Vehículo eliminado</h3>
+      <p>El registro fue eliminado correctamente.</p>
+      <button class="btn ok" (click)="cerrarSuccess()">Aceptar</button>
+    </div>
+  </div>
+
+</div>

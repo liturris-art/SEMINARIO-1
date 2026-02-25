@@ -1,0 +1,104 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* ===== BOTONES GLOBALES ===== */
+.btn {
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+/* Primary - Verde */
+.btn.primary {
+  background: #2e7d32;
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #1b5e20;
+  transform: translateY(-2px);
+}
+
+/* Secondary - Gris */
+.btn.secondary {
+  background: #f1f1f1;
+  color: #444;
+}
+
+.btn.secondary:hover {
+  background: #e0e0e0;
+}
+
+/* Editar */
+.btn.edit {
+  background: #2e7d32;
+  color: white;
+}
+
+.btn.edit:hover {
+  background: #1b5e20;
+  transform: translateY(-2px);
+}
+
+/* Eliminar */
+.btn.delete {
+  background: #c62828;
+  color: white;
+}
+
+.btn.delete:hover {
+  background: #a32222;
+  transform: translateY(-2px);
+}
+
+/* Guardar */
+.btn-guardar {
+  background: #2e7d32;
+  color: white;
+  font-weight: 600;
+  padding: 13px;
+  font-size: 15px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-guardar:hover {
+  background: #1b5e20;
+  transform: translateY(-2px);
+}
+
+/* OK */
+.btn.ok {
+  background: #2e7d32;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.ok:hover {
+  background: #1b5e20;
+}
+
+/* Cancelar */
+.btn.cancel {
+  background: #eeeeee;
+  color: #444;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn.cancel:hover {
+  background: #d4d4d4;
+}
