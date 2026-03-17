@@ -1,0 +1,7 @@
+{
+  "name": "recoleccionApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
