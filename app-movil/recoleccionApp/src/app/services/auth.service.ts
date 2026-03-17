@@ -28,9 +28,7 @@ export class AuthService {
       email,
       password,
       options: {
-        data: {
-          rol: rol
-        }
+        data: { rol }
       }
     });
 
@@ -49,7 +47,7 @@ export class AuthService {
 
     if (error) throw error;
 
-    // guardar credenciales para biometría
+    // 🔥 guardar para biometría
     await this.biometricService.saveCredentials(email, password);
 
     return data;
@@ -57,37 +55,31 @@ export class AuthService {
 
   // LOGOUT
   async logout() {
-
     await this.supabase.auth.signOut();
     this.router.navigate(['/login']);
-
   }
 
   // USUARIO ACTUAL
   async getUser(): Promise<User | null> {
-
     const { data } = await this.supabase.auth.getUser();
-
     return data.user;
-
   }
 
-  // OBTENER ROL
+  // ROL
   async getUserRole() {
-
     const user = await this.getUser();
-
     return user?.user_metadata?.['rol'];
+  }
+
+  // RECUPERAR CONTRASEÑA
+  async resetPassword(email: string) {
+
+    const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'http://localhost:8100/reset-password'
+    });
+
+    if (error) throw error;
 
   }
-async resetPassword(email: string) {
-
-  const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'http://localhost:8100/reset-password'
-  });
-
-  if (error) throw error;
-
-}
 
 }

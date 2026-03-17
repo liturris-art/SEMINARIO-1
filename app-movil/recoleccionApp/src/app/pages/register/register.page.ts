@@ -41,7 +41,7 @@ export class RegisterPage {
 
   email: string = '';
   password: string = '';
-  rol: string = 'ciudadano';
+  rol: string = '';
 
   constructor(
     private supabaseService: SupabaseService,

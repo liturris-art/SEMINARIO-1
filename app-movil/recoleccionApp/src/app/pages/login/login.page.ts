@@ -37,7 +37,6 @@ export class LoginPage implements OnInit {
 
   email: string = '';
   password: string = '';
-
   biometricAvailable: boolean = false;
 
   constructor(
@@ -48,13 +47,17 @@ export class LoginPage implements OnInit {
 
   async ngOnInit() {
 
-    // verificar si el dispositivo soporta biometría
     this.biometricAvailable = await this.biometricService.isAvailable();
 
   }
 
-  // LOGIN NORMAL
+  // 🔐 LOGIN NORMAL
   async login() {
+
+    if (!this.email || !this.password) {
+      alert("Ingrese email y contraseña");
+      return;
+    }
 
     try {
 
@@ -63,16 +66,18 @@ export class LoginPage implements OnInit {
         this.password
       );
 
+      // 🔥 GUARDAR PARA BIOMETRÍA
+      await this.biometricService.saveCredentials(
+        this.email,
+        this.password
+      );
+
       const rol = response.user?.user_metadata?.['rol'];
 
-      if (rol === 'conductor') {
-
-        this.router.navigate(['/conductor']);
-
+      if (rol === 'conductor-mapa') {
+        this.router.navigate(['/conductor-mapa']);
       } else {
-
         this.router.navigate(['/ciudadano']);
-
       }
 
     } catch (error: any) {
@@ -83,7 +88,7 @@ export class LoginPage implements OnInit {
 
   }
 
-  // LOGIN BIOMÉTRICO
+  // 👁 LOGIN BIOMÉTRICO
   async loginBiometric() {
 
     try {
@@ -95,10 +100,8 @@ export class LoginPage implements OnInit {
       const credentials = await this.biometricService.getCredentials();
 
       if (!credentials) {
-
         alert("No hay credenciales guardadas");
         return;
-
       }
 
       this.email = credentials.username;
@@ -114,11 +117,14 @@ export class LoginPage implements OnInit {
     }
 
   }
-goToRegister() {
-  this.router.navigate(['/register']);
-}
-goToForgotPassword() {
-  this.router.navigate(['/forgot-password']);
-}
+
+  // 🚀 NAVEGACIÓN
+  goToRegister() {
+    this.router.navigate(['/register']);
+  }
+
+  goToForgotPassword() {
+    this.router.navigate(['/forgot-password']);
+  }
 
 }

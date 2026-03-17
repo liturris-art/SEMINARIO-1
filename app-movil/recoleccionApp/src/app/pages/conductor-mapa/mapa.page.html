@@ -1,0 +1,13 @@
+<ion-content>
+
+  <div id="map" style="height: 75vh;"></div>
+
+  <ion-button expand="block" (click)="startTracking()" *ngIf="!tracking">
+    Iniciar recorrido
+  </ion-button>
+
+  <ion-button expand="block" color="danger" (click)="stopTracking()" *ngIf="tracking">
+    Finalizar recorrido
+  </ion-button>
+
+</ion-content>

@@ -18,7 +18,7 @@ export class AppComponent {
     private biometricService: BiometricService,
     private router: Router
   ) {
-    //this.initializeApp();
+    //this.initializeApp(); // 🔥 ACTIVADO
   }
 
   async initializeApp() {
@@ -27,7 +27,6 @@ export class AppComponent {
 
       const currentUrl = this.router.url;
 
-      // 🚫 NO redirigir si está en login o register
       if (
         currentUrl.includes('login') ||
         currentUrl.includes('register')
@@ -35,24 +34,21 @@ export class AppComponent {
         return;
       }
 
-      // 🔐 verificar sesión
       const user = await this.authService.getUser();
 
       if (user) {
 
         const rol = user.user_metadata?.['rol'];
 
-        if (rol === 'conductor') {
-          this.router.navigate(['/conductor']);
+        if (rol === 'conductor-mapa') {
+          this.router.navigate(['/conductor-mapa']);
         } else {
           this.router.navigate(['/ciudadano']);
         }
 
         return;
-
       }
 
-      // 👁 biometría
       const biometricAvailable = await this.biometricService.isAvailable();
 
       if (biometricAvailable) {
@@ -73,25 +69,21 @@ export class AppComponent {
             const rol = response.user?.user_metadata?.['rol'];
 
             if (rol === 'conductor') {
-              this.router.navigate(['/conductor']);
+              this.router.navigate(['/conductor-mapa']);
             } else {
               this.router.navigate(['/ciudadano']);
             }
 
             return;
-
           }
-
         }
-
       }
 
-      // 🚪 si no hay nada → login
       this.router.navigate(['/login']);
 
     } catch (error) {
 
-      console.log("Error init:", error);
+      console.log(error);
       this.router.navigate(['/login']);
 
     }

@@ -6,29 +6,32 @@ import { NativeBiometric } from 'capacitor-native-biometric';
 })
 export class BiometricService {
 
-  server = "recoleccion_app";
+  private server = "recoleccion_app";
 
-  constructor() { }
+  constructor() {}
 
-  // verificar si el dispositivo soporta biometría
+  // 🔍 verificar si hay biometría disponible
   async isAvailable(): Promise<boolean> {
 
     try {
 
       const result = await NativeBiometric.isAvailable();
 
+      console.log("Biometría disponible:", result);
+
       return result.isAvailable;
 
     } catch (error) {
 
+      console.log("Biometría no disponible:", error);
       return false;
 
     }
 
   }
 
-  // guardar credenciales
-  async saveCredentials(username: string, password: string) {
+  // 💾 guardar credenciales
+  async saveCredentials(username: string, password: string): Promise<void> {
 
     try {
 
@@ -38,16 +41,18 @@ export class BiometricService {
         server: this.server
       });
 
+      console.log("Credenciales guardadas");
+
     } catch (error) {
 
-      console.log("Error guardando biometría", error);
+      console.log("Error guardando credenciales:", error);
 
     }
 
   }
 
-  // obtener credenciales guardadas
-  async getCredentials() {
+  // 📥 obtener credenciales
+  async getCredentials(): Promise<{ username: string; password: string } | null> {
 
     try {
 
@@ -55,17 +60,23 @@ export class BiometricService {
         server: this.server
       });
 
-      return credentials;
+      console.log("Credenciales obtenidas");
+
+      return {
+        username: credentials.username,
+        password: credentials.password
+      };
 
     } catch (error) {
 
+      console.log("No hay credenciales guardadas");
       return null;
 
     }
 
   }
 
-  // autenticación biométrica
+  // 👁 autenticación biométrica
   async verifyIdentity(): Promise<boolean> {
 
     try {
@@ -77,18 +88,21 @@ export class BiometricService {
         description: "Confirma tu identidad"
       });
 
+      console.log("Biometría verificada");
+
       return true;
 
     } catch (error) {
 
+      console.log("Biometría cancelada o fallida");
       return false;
 
     }
 
   }
 
-  // eliminar credenciales
-  async deleteCredentials() {
+  // 🗑 eliminar credenciales
+  async deleteCredentials(): Promise<void> {
 
     try {
 
@@ -96,9 +110,11 @@ export class BiometricService {
         server: this.server
       });
 
+      console.log("Credenciales eliminadas");
+
     } catch (error) {
 
-      console.log(error);
+      console.log("Error eliminando credenciales:", error);
 
     }
 
