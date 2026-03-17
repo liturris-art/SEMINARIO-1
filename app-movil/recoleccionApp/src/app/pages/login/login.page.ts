@@ -114,5 +114,11 @@ export class LoginPage implements OnInit {
     }
 
   }
+goToRegister() {
+  this.router.navigate(['/register']);
+}
+goToForgotPassword() {
+  this.router.navigate(['/forgot-password']);
+}
 
 }

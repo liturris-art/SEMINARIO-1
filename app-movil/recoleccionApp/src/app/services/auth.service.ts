@@ -80,5 +80,14 @@ export class AuthService {
     return user?.user_metadata?.['rol'];
 
   }
+async resetPassword(email: string) {
+
+  const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'http://localhost:8100/reset-password'
+  });
+
+  if (error) throw error;
+
+}
 
 }

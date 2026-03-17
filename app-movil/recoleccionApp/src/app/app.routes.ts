@@ -26,4 +26,14 @@ export const routes: Routes = [
     path: 'ciudadano',
     loadComponent: () => import('./pages/ciudadano/ciudadano.page').then( m => m.CiudadanoPage)
   },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./pages/forgot-password/forgot-password.page').then( m => m.ForgotPasswordPage)
+  },
+  
+  {
+  path: 'forgot-password',
+  loadComponent: () =>
+    import('./pages/forgot-password/forgot-password.page').then(m => m.ForgotPasswordPage)
+}
 ];

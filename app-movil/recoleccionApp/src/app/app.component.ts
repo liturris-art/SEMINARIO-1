@@ -18,14 +18,24 @@ export class AppComponent {
     private biometricService: BiometricService,
     private router: Router
   ) {
-    this.initializeApp();
+    //this.initializeApp();
   }
 
   async initializeApp() {
 
     try {
 
-      // verificar si hay usuario logueado
+      const currentUrl = this.router.url;
+
+      // 🚫 NO redirigir si está en login o register
+      if (
+        currentUrl.includes('login') ||
+        currentUrl.includes('register')
+      ) {
+        return;
+      }
+
+      // 🔐 verificar sesión
       const user = await this.authService.getUser();
 
       if (user) {
@@ -42,7 +52,7 @@ export class AppComponent {
 
       }
 
-      // si no hay sesión → intentar biometría
+      // 👁 biometría
       const biometricAvailable = await this.biometricService.isAvailable();
 
       if (biometricAvailable) {
@@ -68,18 +78,20 @@ export class AppComponent {
               this.router.navigate(['/ciudadano']);
             }
 
+            return;
+
           }
 
         }
 
       }
 
-      // si no hay sesión ni biometría
+      // 🚪 si no hay nada → login
       this.router.navigate(['/login']);
 
     } catch (error) {
 
-      console.log(error);
+      console.log("Error init:", error);
       this.router.navigate(['/login']);
 
     }

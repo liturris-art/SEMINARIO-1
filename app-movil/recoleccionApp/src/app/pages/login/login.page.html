@@ -27,8 +27,10 @@
     Iniciar sesión
   </ion-button>
 
-  <ion-button expand="block" fill="clear" routerLink="/register">
-    Crear cuenta
-  </ion-button>
-
+  <ion-button expand="block" fill="clear" (click)="goToRegister()">
+  Crear cuenta
+</ion-button>
+<ion-button fill="clear" (click)="goToForgotPassword()">
+  ¿Olvidaste tu contraseña?
+</ion-button>
 </ion-content>
