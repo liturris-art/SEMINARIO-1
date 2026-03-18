@@ -37,15 +37,6 @@ export class AppComponent {
       const user = await this.authService.getUser();
 
       if (user) {
-
-        const rol = user.user_metadata?.['rol'];
-
-        if (rol === 'conductor-mapa') {
-          this.router.navigate(['/conductor-mapa']);
-        } else {
-          this.router.navigate(['/ciudadano']);
-        }
-
         return;
       }
 
@@ -66,15 +57,9 @@ export class AppComponent {
               credentials.password
             );
 
-            const rol = response.user?.user_metadata?.['rol'];
-
-            if (rol === 'conductor') {
-              this.router.navigate(['/conductor-mapa']);
-            } else {
-              this.router.navigate(['/ciudadano']);
+            if (response.user) {
+              return;
             }
-
-            return;
           }
         }
       }

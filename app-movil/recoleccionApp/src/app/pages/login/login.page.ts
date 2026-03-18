@@ -66,19 +66,10 @@ export class LoginPage implements OnInit {
         this.password
       );
 
-      // 🔥 GUARDAR PARA BIOMETRÍA
-      await this.biometricService.saveCredentials(
-        this.email,
-        this.password
-      );
-
       const rol = response.user?.user_metadata?.['rol'];
+      const rolLabel = rol ? ` (${rol})` : '';
 
-      if (rol === 'conductor-mapa') {
-        this.router.navigate(['/conductor-mapa']);
-      } else {
-        this.router.navigate(['/ciudadano']);
-      }
+      alert(`Inicio de sesión correcto${rolLabel}. No hay pantalla asignada todavía.`);
 
     } catch (error: any) {
 

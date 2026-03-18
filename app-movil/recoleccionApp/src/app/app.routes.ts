@@ -19,13 +19,5 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/forgot-password/forgot-password.page').then(m => m.ForgotPasswordPage)
   },
-  {
-    path: 'ciudadano',
-    loadComponent: () => import('./pages/ciudadano/ciudadano.page').then(m => m.CiudadanoPage)
-  },
-  {
-    path: 'conductor-mapa',
-    loadComponent: () =>
-      import('./pages/conductor-mapa/mapa.page').then(m => m.MapaPage)
-  }
+ 
 ];
