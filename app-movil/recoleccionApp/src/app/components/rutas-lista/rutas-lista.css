@@ -1,0 +1,323 @@
+/* ===== VARIABLES ===== */
+:root {
+  --primary: #0ea5a4;
+  --primary-hover: #0c8d8c;
+  --sidebar-bg: #ffffff;
+  --bg: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --radius: 14px;
+  --shadow-1: 0 4px 14px rgba(0,0,0,0.06);
+  --shadow-2: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+/* ===== LAYOUT GENERAL ===== */
+.layout {
+  display: flex;
+  height: 100vh;
+  background: var(--bg);
+  font-family: system-ui, sans-serif;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 250px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo svg {
+  width: 36px;
+  height: 36px;
+}
+
+.brand h1 {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.brand span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* MENU */
+.menu {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.menu .item {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: 0.2s;
+}
+
+.menu .item:hover {
+  background: #f1f5f9;
+}
+
+.menu .item.active {
+  background: #d1faf5;
+  color: var(--primary);
+}
+
+/* Settings abajo */
+.settings {
+  margin-top: auto;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* ===== CONTENIDO ===== */
+.content {
+  flex-grow: 1;
+  padding: 30px 40px;
+}
+
+h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* GRID */
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 22px;
+}
+
+/* MAPA */
+#container-mapa {
+  background: #e5e7eb;
+  height: 680px;
+  width: 100%;
+  border-radius: 14px;
+  box-shadow: var(--shadow-1);
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* PANEL DERECHO */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-1);
+}
+
+/* INPUT FLOATING */
+label.floating {
+  position: relative;
+  display: block;
+  margin-bottom: 18px;
+}
+
+label.floating input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  transition: 0.2s;
+  font-size: 1rem;
+}
+
+label.floating input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(14,165,164,0.15);
+}
+
+label.floating span {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  font-size: 0.95rem;
+  color: var(--muted);
+  transition: 0.2s;
+  pointer-events: none;
+}
+
+label.floating input:focus + span,
+label.floating input:not(:placeholder-shown) + span {
+  top: -8px;
+  background: white;
+  padding: 0 6px;
+  font-size: 0.78rem;
+  color: var(--primary);
+}
+
+/* COLORES */
+.colors {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.c {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.c.active {
+  border: 3px solid black;
+}
+
+.add {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+/* BUTTONS */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  margin-top: 6px;
+  cursor: pointer;
+  transition: 0.18s;
+}
+
+.btn.primary {
+  background: #27732b;
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #3db143;
+}
+
+.btn.secondary {
+  background: #e2e8f0;
+}
+
+.btn.secondary:hover {
+  background: #cbd5e1;
+}
+
+/* SELECT MODERNO */
+.select-modern {
+  background: white;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.dropdown {
+  margin-top: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+  padding: 4px 0;
+  box-shadow: var(--shadow-2);
+}
+
+.dropdown li {
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  gap: 10px;
+}
+
+.dropdown li:hover {
+  background: #f1f5f9;
+}
+
+.sub {
+  color: var(--muted);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1050px) {
+  .content-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dropdown modernizado y limitado */
+.dropdown {
+  margin-top: 6px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #d6e0ea;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  padding: 4px 0;
+  max-height: 260px;     /* 🔥 LIMITE PARA LISTAS GRANDES */
+  overflow-y: auto;      /* 🔥 SCROLL INTERNO */
+  animation: fadeIn 0.15s ease;
+  z-index: 20;
+  position: absolute;    /* 🔥 EVITA QUE ROMPA EL DISEÑO */
+  width: 100%;           /* 🔥 QUE CUADRE CON EL SELECT */
+}
+
+/* Animación suave */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown li {
+  list-style: none;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: 0.18s;
+}
+
+.dropdown li:hover {
+  background: #eef7fa;
+}
+
+.select-wrapper {
+  position: relative; /* 🔥 NECESARIO PARA QUE EL dropdown se ancle bien */
+}
+

@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Recorrido</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <ion-button expand="block" (click)="iniciarRecorrido()">
+    ▶️ Iniciar Recorrido
+  </ion-button>
+
+  <ion-button expand="block" color="danger" (click)="detenerRecorrido()">
+    ⛔ Detener Recorrido
+  </ion-button>
+
+  <p *ngIf="lat && lng">
+    📍 Lat: {{ lat }} <br>
+    📍 Lng: {{ lng }}
+  </p>
+
+</ion-content>

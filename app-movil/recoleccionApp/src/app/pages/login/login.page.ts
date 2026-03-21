@@ -46,9 +46,7 @@ export class LoginPage implements OnInit {
   ) {}
 
   async ngOnInit() {
-
     this.biometricAvailable = await this.biometricService.isAvailable();
-
   }
 
   // 🔐 LOGIN NORMAL
@@ -67,14 +65,18 @@ export class LoginPage implements OnInit {
       );
 
       const rol = response.user?.user_metadata?.['rol'];
-      const rolLabel = rol ? ` (${rol})` : '';
 
-      alert(`Inicio de sesión correcto${rolLabel}. No hay pantalla asignada todavía.`);
+      console.log('✅ Login correcto:', rol);
+
+      // 🔥 REDIRECCIÓN SEGÚN ROL
+      if (rol === 'conductor') {
+        this.router.navigate(['/configuracion']);
+      } else {
+        this.router.navigate(['/home']);
+      }
 
     } catch (error: any) {
-
       alert(error.message || "Error al iniciar sesión");
-
     }
 
   }
@@ -85,7 +87,6 @@ export class LoginPage implements OnInit {
     try {
 
       const verified = await this.biometricService.verifyIdentity();
-
       if (!verified) return;
 
       const credentials = await this.biometricService.getCredentials();
@@ -101,10 +102,8 @@ export class LoginPage implements OnInit {
       await this.login();
 
     } catch (error) {
-
       console.log(error);
       alert("Error con autenticación biométrica");
-
     }
 
   }

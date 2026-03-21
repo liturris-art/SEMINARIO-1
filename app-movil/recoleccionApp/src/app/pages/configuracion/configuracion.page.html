@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Configuración</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- 🚗 VEHÍCULO -->
+  <ion-item>
+    <ion-label>Vehículo</ion-label>
+    <ion-select [(ngModel)]="vehiculoSeleccionado">
+      <ion-select-option *ngFor="let v of vehiculos" [value]="v">
+        {{ v.placa || v.nombre }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- 🛣 RUTA -->
+  <ion-item>
+    <ion-label>Ruta</ion-label>
+    <ion-select [(ngModel)]="rutaSeleccionada">
+      <ion-select-option *ngFor="let r of rutas" [value]="r">
+        {{ r.nombre || r.descripcion }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- 🏙 CALLE (OPCIONAL) -->
+  <ion-item>
+    <ion-label>Calle</ion-label>
+    <ion-select [(ngModel)]="calleSeleccionada">
+      <ion-select-option *ngFor="let c of calles" [value]="c">
+        {{ c.nombre }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
+
+  <!-- 🚀 BOTÓN -->
+  <ion-button expand="block" (click)="continuar()">
+    Iniciar Recorrido
+  </ion-button>
+
+</ion-content>
