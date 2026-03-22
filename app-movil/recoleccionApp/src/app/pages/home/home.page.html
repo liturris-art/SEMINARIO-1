@@ -1,22 +1,97 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Recorrido</ion-title>
+    <ion-buttons slot="start">
+      <ion-button size="small" fill="clear" (click)="regresar()">
+        ← Volver
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      {{ userRole === 'conductor' ? 'Recorrido' : 'Observador de Rutas' }}
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+  <!-- Contenido para Conductor - tracking de recorridos -->
+  <div *ngIf="userRole === 'conductor'">
+    <p>
+      Estado:
+      <strong [ngStyle]="{ color: tracking ? 'green' : 'gray' }">
+        {{ tracking ? 'En seguimiento' : 'Detenido' }}
+      </strong>
+    </p>
 
-  <ion-button expand="block" (click)="iniciarRecorrido()">
-    ▶️ Iniciar Recorrido
-  </ion-button>
+    <ion-button
+      expand="block"
+      [disabled]="tracking"
+      (click)="iniciarRecorrido()"
+    >
+      ▶️ Iniciar Recorrido
+    </ion-button>
 
-  <ion-button expand="block" color="danger" (click)="detenerRecorrido()">
-    ⛔ Detener Recorrido
-  </ion-button>
+    <ion-button
+      expand="block"
+      color="danger"
+      [disabled]="!tracking"
+      (click)="detenerRecorrido()"
+    >
+      ⛔ Detener Recorrido
+    </ion-button>
 
-  <p *ngIf="lat && lng">
-    📍 Lat: {{ lat }} <br>
-    📍 Lng: {{ lng }}
-  </p>
+    <p *ngIf="lat && lng">
+      📍 Lat: {{ lat }} <br />
+      📍 Lng: {{ lng }}
+    </p>
 
+    <p *ngIf="!tracking && lat && lng" style="color: #555">
+      Recorrido detenido. Posición final guardada localmente.
+    </p>
+  </div>
+
+  <!-- Contenido para Ciudadano - observación de rutas con MAPA INTERACTIVO -->
+  <div *ngIf="userRole === 'ciudadano'">
+    <h2>🗺️ Mapa de Rutas Disponibles</h2>
+    <p class="map-description">
+      Observa las rutas de recolección activas en tiempo real
+    </p>
+
+    <!-- MAPA INTERACTIVO -->
+    <app-map-view [rutas]="rutas" [calles]="calles" [userRole]="userRole">
+    </app-map-view>
+
+    <!-- Información adicional -->
+    <div class="map-info">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>📊 Información de Rutas</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <p><strong>Rutas activas:</strong> {{ rutas.length }}</p>
+          <p><strong>Puntos de recolección:</strong> {{ calles.length }}</p>
+
+          <!-- Lista de rutas con colores -->
+          <div class="rutas-list" *ngIf="rutas.length > 0">
+            <h4>Rutas disponibles:</h4>
+            <div class="ruta-item" *ngFor="let ruta of rutas">
+              <span
+                class="ruta-color"
+                [style.background-color]="ruta.color_hex || '#3388ff'"
+              ></span>
+              <span class="ruta-name">{{ ruta.nombre_ruta }}</span>
+            </div>
+          </div>
+
+          <p *ngIf="rutas.length === 0" class="no-data">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            No hay rutas activas en este momento.
+          </p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Mensaje si no hay rol definido -->
+  <div *ngIf="!userRole">
+    <p>Cargando...</p>
+  </div>
 </ion-content>

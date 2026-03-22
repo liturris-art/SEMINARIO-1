@@ -5,6 +5,15 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  <ion-list>
+    <ion-item *ngIf="cargandoDatos">
+      <ion-label>Cargando datos... </ion-label>
+      <ion-spinner slot="end"></ion-spinner>
+    </ion-item>
+    <ion-item *ngIf="errorMessage">
+      <ion-label color="danger">{{ errorMessage }}</ion-label>
+    </ion-item>
+  </ion-list>
 
   <!-- 🚗 VEHÍCULO -->
   <ion-item>
@@ -21,10 +30,32 @@
     <ion-label>Ruta</ion-label>
     <ion-select [(ngModel)]="rutaSeleccionada">
       <ion-select-option *ngFor="let r of rutas" [value]="r">
-        {{ r.nombre || r.descripcion }}
+        <div>
+          <strong>{{ r.nombre || r.descripcion || 'Ruta sin nombre' }}</strong>
+          <p style="font-size: 0.85em; margin: 0.2rem 0 0 0; color: #666">
+            {{ r.observacion || r.detalle || r.descripcion || 'Sin descripción'
+            }}
+          </p>
+        </div>
       </ion-select-option>
     </ion-select>
   </ion-item>
+
+  <ion-text color="medium" *ngIf="!rutas.length && !cargandoDatos">
+    <small
+      >No se encontró ninguna ruta para este perfil. Presiona refrescar.</small
+    >
+  </ion-text>
+
+  <ion-button
+    fill="clear"
+    color="primary"
+    (click)="cargarDatos()"
+    [disabled]="cargandoDatos"
+  >
+    <ion-icon name="refresh-outline" slot="start"></ion-icon>
+    Refrescar lista
+  </ion-button>
 
   <!-- 🏙 CALLE (OPCIONAL) -->
   <ion-item>
@@ -40,5 +71,4 @@
   <ion-button expand="block" (click)="continuar()">
     Iniciar Recorrido
   </ion-button>
-
 </ion-content>

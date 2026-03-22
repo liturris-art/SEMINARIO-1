@@ -5,31 +5,29 @@ import { Router } from '@angular/router';
 import { BiometricService } from './biometric.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-
   supabase: SupabaseClient;
 
   constructor(
     private router: Router,
-    private biometricService: BiometricService
+    private biometricService: BiometricService,
   ) {
     this.supabase = createClient(
       environment.supabaseUrl,
-      environment.supabaseAnonKey
+      environment.supabaseAnonKey,
     );
   }
 
   // REGISTRO
   async register(email: string, password: string, rol: string) {
-
     const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { rol }
-      }
+        data: { rol },
+      },
     });
 
     if (error) throw error;
@@ -39,11 +37,12 @@ export class AuthService {
 
   // LOGIN
   async login(email: string, password: string) {
-
     const { data, error } = await this.supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
+
+    console.log('[AUTH] signInWithPassword data', data, 'error', error);
 
     if (error) throw error;
 
@@ -65,6 +64,12 @@ export class AuthService {
     return data.user;
   }
 
+  // VERIFICAR SI ESTÁ LOGUEADO
+  async isLoggedIn(): Promise<boolean> {
+    const user = await this.getUser();
+    return user !== null;
+  }
+
   // ROL
   async getUserRole() {
     const user = await this.getUser();
@@ -73,13 +78,10 @@ export class AuthService {
 
   // RECUPERAR CONTRASEÑA
   async resetPassword(email: string) {
-
     const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:8100/reset-password'
+      redirectTo: 'http://localhost:8100/reset-password',
     });
 
     if (error) throw error;
-
   }
-
 }

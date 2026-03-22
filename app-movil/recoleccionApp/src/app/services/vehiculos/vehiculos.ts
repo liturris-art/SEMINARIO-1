@@ -5,32 +5,45 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VehiculosService {
+  // Servicio que se conecta con la API del docente para gestionar vehículos
+  // Usamos la URL de la API definida en environment.ts
   private apiUrl = environment.apiUrl;
   private perfilUrl = environment.perfilUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  getVehiculos(): Observable<{data: Vehiculo[]}> {
-    return this.http.get<{data: Vehiculo[]}>(`${this.apiUrl}/vehiculos?perfil_id=${this.perfilUrl}`);
+  getVehiculos(): Observable<{ data: Vehiculo[] }> {
+    return this.http.get<{ data: Vehiculo[] }>(
+      `${this.apiUrl}/vehiculos?perfil_id=${this.perfilUrl}`,
+    );
   }
 
   createVehiculo(vehiculo: Vehiculo): Observable<Vehiculo> {
-    return this.http.post<Vehiculo>(`${this.apiUrl}/vehiculos?perfil_id=${this.perfilUrl}`, vehiculo);
+    return this.http.post<Vehiculo>(
+      `${this.apiUrl}/vehiculos?perfil_id=${this.perfilUrl}`,
+      vehiculo,
+    );
   }
 
   getVehiculo(id: string): Observable<Vehiculo> {
-    return this.http.get<Vehiculo>(`${this.apiUrl}/vehiculos/${id}?perfil_id=${this.perfilUrl}`);
+    return this.http.get<Vehiculo>(
+      `${this.apiUrl}/vehiculos/${id}?perfil_id=${this.perfilUrl}`,
+    );
   }
 
   updateVehiculo(id: string, vehiculo: Vehiculo): Observable<Vehiculo> {
-    return this.http.put<Vehiculo>(`${this.apiUrl}/vehiculos/${id}?perfil_id=${this.perfilUrl}`, vehiculo);
+    return this.http.put<Vehiculo>(
+      `${this.apiUrl}/vehiculos/${id}?perfil_id=${this.perfilUrl}`,
+      vehiculo,
+    );
   }
 
   deleteVehiculo(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/vehiculos/${id}?perfil_id=${this.perfilUrl}`);
+    return this.http.delete<void>(
+      `${this.apiUrl}/vehiculos/${id}?perfil_id=${this.perfilUrl}`,
+    );
   }
-
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { IonicModule } from '@ionic/angular';
@@ -7,17 +7,55 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '@capacitor/preferences';
 import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { RutasService } from '../../services/rutas/rutas';
+import { CallesService } from '../../services/calles/calles';
+import { MapViewComponent } from '../../components/map-view/map-view.component';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, MapViewComponent],
 })
-export class HomePage {
+export class HomePage implements OnInit {
+  // Propiedad para el rol del usuario - añadido para manejar ciudadanos y conductores
+  userRole: string = '';
 
-  constructor(private http: HttpClient) {}
+  // Para ciudadanos: mapa y datos
+  rutas: any[] = [];
+  calles: any[] = [];
+
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private rutasService: RutasService,
+    private callesService: CallesService,
+  ) {}
+
+  async ngOnInit() {
+    // Obtener el rol del usuario al iniciar - mejora para roles
+    this.userRole = (await this.authService.getUserRole()) || '';
+
+    // Si es ciudadano, cargar datos para el mapa
+    if (this.userRole === 'ciudadano') {
+      this.cargarDatosMapa();
+    }
+  }
+
+  // Método para cargar rutas y calles para ciudadanos - añadido para observación
+  cargarDatosMapa() {
+    this.rutasService.getRutas().subscribe((res: any) => {
+      this.rutas = res.data || [];
+      console.log('Rutas cargadas para ciudadano:', this.rutas);
+    });
+
+    this.callesService.getCalles().subscribe((res: any) => {
+      this.calles = res.data || [];
+      console.log('Calles cargadas para ciudadano:', this.calles);
+    });
+  }
 
   tracking: boolean = false;
   lat: number = 0;
@@ -44,12 +82,11 @@ export class HomePage {
 
       // 📏 DISTANCIA
       if (this.ultimaLat !== null && this.ultimaLng !== null) {
-
         const distancia = this.calcularDistancia(
           this.ultimaLat,
           this.ultimaLng,
           this.lat,
-          this.lng
+          this.lng,
         );
 
         this.distanciaAcumulada += distancia;
@@ -68,11 +105,27 @@ export class HomePage {
   }
 
   detenerRecorrido() {
+    if (!this.tracking) {
+      alert('No hay recorrido activo.');
+      return;
+    }
+
     this.tracking = false;
 
     if (this.watchId) {
       Geolocation.clearWatch({ id: this.watchId });
+      this.watchId = null;
     }
+
+    console.log('⛔ Recorrido detenido');
+    alert('Recorrido detenido. Las últimas coordenadas quedan registradas.');
+  }
+
+  regresar() {
+    if (this.tracking) {
+      this.detenerRecorrido();
+    }
+    window.history.back();
   }
 
   // 🌐 INTERNET
@@ -89,13 +142,42 @@ export class HomePage {
 
     await Preferences.set({
       key: 'datosOffline',
-      value: JSON.stringify(datos)
+      value: JSON.stringify(datos),
     });
 
     console.log('💾 Guardado offline');
   }
 
   // 🔄 SINCRONIZACIÓN
+  private async postTrackingData(data: any) {
+    const base = `${environment.apiUrl}`;
+    const urls: string[] = environment.trackingEndpoints.map(
+      (endpoint) => `${base}/${endpoint}?perfil_id=${environment.perfilUrl}`,
+    );
+    urls.push(`${base}/${environment.perfilUrl}`); // compatibilidad antigua
+
+    let lastError: any;
+
+    for (const url of urls) {
+      try {
+        await firstValueFrom(this.http.post(url, data));
+        console.log('✅ Enviado a', url);
+        return true;
+      } catch (error: any) {
+        lastError = error;
+        if (error?.status === 404) {
+          console.warn('URL no encontrada, probando otra:', url);
+          continue;
+        }
+        console.warn('Error no 404 en URL', url, error);
+        throw error; // fallo de otro tipo, salir para guardar offline
+      }
+    }
+
+    console.warn('No se encontró endpoint válido. Último error:', lastError);
+    return false;
+  }
+
   async sincronizarDatos() {
     if (!this.hayInternet()) return;
 
@@ -103,20 +185,33 @@ export class HomePage {
     if (!value) return;
 
     const datos = JSON.parse(value);
-    const url = `${environment.apiUrl}/${environment.perfilUrl}`;
 
+    let sincronizados = 0;
     for (let item of datos) {
       try {
-        await firstValueFrom(this.http.post(url, item));
+        const enviado = await this.postTrackingData(item);
+        if (enviado) {
+          sincronizados++;
+          continue;
+        }
+        console.log(
+          '❌ No se sincronizó este item, queda guardado offline',
+          item,
+        );
       } catch (error) {
         console.log('❌ Error sincronizando', error);
-        return; // se detiene si falla
+        break; // dejar restantes para el próximo intento
       }
     }
 
-    await Preferences.remove({ key: 'datosOffline' });
+    if (sincronizados > 0) {
+      console.log(`🔄 ${sincronizados} items sincronizados`);
+    }
 
-    console.log('🔄 Datos sincronizados');
+    if (sincronizados === datos.length) {
+      await Preferences.remove({ key: 'datosOffline' });
+      console.log('🔄 Todos los datos sincronizados y removidos offline');
+    }
   }
 
   // 📡 ENVÍO GPS
@@ -124,16 +219,19 @@ export class HomePage {
     const data = {
       lat: this.lat,
       lng: this.lng,
-      fecha: new Date()
+      fecha: new Date(),
     };
-
-    const url = `${environment.apiUrl}/${environment.perfilUrl}`;
 
     if (this.hayInternet()) {
       try {
-        await firstValueFrom(this.http.post(url, data));
-        console.log('✅ Coordenada enviada');
-      } catch {
+        const enviado = await this.postTrackingData(data);
+        if (enviado) {
+          console.log('✅ Coordenada enviada');
+        } else {
+          throw new Error('No se encontró endpoint válido para coordenadas');
+        }
+      } catch (error) {
+        console.warn('⚠️ Envío falla, guardo offline', error);
         await this.guardarOffline(data);
       }
     } else {
@@ -150,8 +248,8 @@ export class HomePage {
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos(this.toRad(lat1)) *
-      Math.cos(this.toRad(lat2)) *
-      Math.sin(dLon / 2) ** 2;
+        Math.cos(this.toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
 
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
   }
@@ -169,7 +267,7 @@ export class HomePage {
         quality: 50,
         allowEditing: false,
         resultType: CameraResultType.Base64,
-        source: CameraSource.Camera
+        source: CameraSource.Camera,
       });
 
       const base64Image = 'data:image/jpeg;base64,' + image.base64String;
@@ -178,22 +276,24 @@ export class HomePage {
         lat: this.lat,
         lng: this.lng,
         fecha: new Date(),
-        imagen: base64Image
+        imagen: base64Image,
       };
-
-      const url = `${environment.apiUrl}/${environment.perfilUrl}`;
 
       if (this.hayInternet()) {
         try {
-          await firstValueFrom(this.http.post(url, data));
-          console.log('📸 Evidencia enviada');
-        } catch {
+          const enviado = await this.postTrackingData(data);
+          if (enviado) {
+            console.log('📸 Evidencia enviada');
+          } else {
+            throw new Error('No se encontró endpoint válido para hito');
+          }
+        } catch (error) {
+          console.warn('⚠️ Envío de hito falla, guardo offline', error);
           await this.guardarOffline(data);
         }
       } else {
         await this.guardarOffline(data);
       }
-
     } catch {
       console.log('❌ Cámara cancelada');
     }

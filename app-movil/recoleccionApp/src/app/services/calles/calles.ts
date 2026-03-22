@@ -5,19 +5,24 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CallesService {
+  // Servicio que conecta con la API del docente para obtener información de calles
   private apiUrl = environment.apiUrl;
   private perfilUrl = environment.perfilUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  getCalles(): Observable<{data: Calle[]}> {
-    return this.http.get<{data: Calle[]}>(`${this.apiUrl}/calles?perfil_id=${this.perfilUrl}`);
+  getCalles(): Observable<{ data: Calle[] }> {
+    return this.http.get<{ data: Calle[] }>(
+      `${this.apiUrl}/calles?perfil_id=${this.perfilUrl}`,
+    );
   }
 
   getCalleId(id: string): Observable<Calle> {
-    return this.http.get<Calle>(`${this.apiUrl}/calles/${id}?perfil_id=${this.perfilUrl}`);
+    return this.http.get<Calle>(
+      `${this.apiUrl}/calles/${id}?perfil_id=${this.perfilUrl}`,
+    );
   }
 }

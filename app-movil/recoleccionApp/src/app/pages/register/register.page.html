@@ -1,54 +1,109 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Registro</ion-title>
+    <ion-title>Crear cuenta</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="register-content">
+  <!-- Logo o ícono de la app -->
+  <div class="logo-container">
+    <ion-icon name="person-add-outline" size="large" color="primary"></ion-icon>
+    <h1 class="app-title">Registro</h1>
+    <p class="app-subtitle">Únete a Recolección App</p>
+  </div>
 
-  <ion-item>
-    <ion-input
-      label="Email"
-      label-placement="floating"
-      name="email"
-      type="email"
-      [(ngModel)]="email">
-    </ion-input>
-  </ion-item>
+  <!-- Formulario de registro con validaciones -->
+  <form
+    [formGroup]="registerForm"
+    (ngSubmit)="register()"
+    class="form-container"
+  >
+    <ion-item
+      class="input-item"
+      [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+    >
+      <ion-input
+        label="Email"
+        label-placement="floating"
+        formControlName="email"
+        type="email"
+      >
+      </ion-input>
+    </ion-item>
+    <ion-note
+      *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+      color="danger"
+      class="error-message"
+    >
+      Email inválido
+    </ion-note>
 
-  <ion-item>
-    <ion-input
-      label="Contraseña"
-      label-placement="floating"
-      name="password"
-      type="password"
-      [(ngModel)]="password">
-    </ion-input>
-  </ion-item>
+    <ion-item
+      class="input-item"
+      [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+    >
+      <ion-input
+        type="password"
+        label="Contraseña"
+        label-placement="floating"
+        formControlName="password"
+      >
+      </ion-input>
+    </ion-item>
+    <ion-note
+      *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+      color="danger"
+      class="error-message"
+    >
+      Mínimo 8 caracteres
+    </ion-note>
 
-  <ion-item>
-    <ion-select
-      label="Tipo de usuario"
-      name="rol"
-      [(ngModel)]="rol">
+    <ion-item
+      class="input-item"
+      [class.error]="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched"
+    >
+      <ion-select
+        label="Tipo de usuario"
+        label-placement="floating"
+        formControlName="rol"
+      >
+        <ion-select-option value="ciudadano">
+          👤 Ciudadano - Observar rutas
+        </ion-select-option>
+        <ion-select-option value="conductor">
+          🚗 Conductor - Gestionar recorridos
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-note
+      *ngIf="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched"
+      color="danger"
+      class="error-message"
+    >
+      Selecciona un tipo de usuario
+    </ion-note>
 
-      <ion-select-option value="ciudadano">
-        Ciudadano
-      </ion-select-option>
+    <ion-button
+      expand="block"
+      type="submit"
+      [disabled]="registerForm.invalid || isLoading"
+      class="register-btn"
+    >
+      <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!isLoading" name="person-add" slot="start"></ion-icon>
+      {{ isLoading ? 'Registrando...' : 'Crear cuenta' }}
+    </ion-button>
 
-      <ion-select-option value="conductor">
-        Conductor
-      </ion-select-option>
-
-    </ion-select>
-  </ion-item>
-
-  <ion-button expand="block" (click)="register()">
-    Registrarse
-  </ion-button>
-
-  <ion-button expand="block" fill="clear" routerLink="/login">
-    Ya tengo cuenta
-  </ion-button>
-
+    <div class="login-link">
+      <ion-button
+        expand="block"
+        fill="clear"
+        routerLink="/login"
+        class="login-btn"
+      >
+        <ion-icon name="log-in" slot="start"></ion-icon>
+        Ya tengo cuenta
+      </ion-button>
+    </div>
+  </form>
 </ion-content>
