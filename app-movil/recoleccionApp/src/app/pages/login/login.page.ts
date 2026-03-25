@@ -31,7 +31,7 @@ import {
   AppUser,
   BiometricCredentials,
   UserMetadata,
-} from '../../interfaces/user';
+} from '../../../interfaces/user';
 
 @Component({
   selector: 'app-login',
