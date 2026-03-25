@@ -1,173 +1,136 @@
-import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { Component, AfterViewInit, Input } from '@angular/core';
 import * as L from 'leaflet';
 
 @Component({
   selector: 'app-map-view',
-  template: `
-    <div class="map-container">
-      <div id="map" class="map-view"></div>
-      <div class="map-overlay" *ngIf="loading">
-        <ion-spinner name="crescent"></ion-spinner>
-        <p>Cargando mapa...</p>
-      </div>
-    </div>
-  `,
-  styles: [
-    `
-      .map-container {
-        position: relative;
-        width: 100%;
-        height: 400px;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .map-view {
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-      }
-
-      .map-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(255, 255, 255, 0.9);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-
-        ion-spinner {
-          margin-bottom: 10px;
-        }
-
-        p {
-          margin: 0;
-          color: var(--ion-color-primary);
-          font-weight: 500;
-        }
-      }
-    `,
-  ],
-  standalone: true,
-  imports: [CommonModule, IonicModule],
+  templateUrl: './map-view.component.html',
+  styleUrls: ['./map-view.component.scss'],
+  standalone: true
 })
-export class MapViewComponent implements OnInit, AfterViewInit {
-  @Input() rutas: any[] = [];
-  @Input() calles: any[] = [];
-  @Input() userRole: string = '';
+export class MapViewComponent implements AfterViewInit {
 
-  private map: any;
-  loading: boolean = true;
+  @Input() rutas:any[] = [];
+  @Input() calles:any[] = [];
+  @Input() userRole:string = '';
 
-  ngOnInit() {
-    // Fix para íconos de Leaflet en Angular
-    this.fixLeafletIcons();
+  map!:L.Map;
+
+  ngAfterViewInit(){
+    this.inicializarMapa();
+    this.dibujarRutas();
+    this.dibujarCalles();
   }
 
-  ngAfterViewInit() {
-    this.initializeMap();
+  inicializarMapa(){
+
+    setTimeout(()=>{
+
+      this.map = L.map('map').setView([4.6097,-74.0817],13);
+
+      L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+          attribution:'© OpenStreetMap'
+        }
+      ).addTo(this.map);
+
+      // recalcular tamaño
+      setTimeout(()=>{
+        this.map.invalidateSize();
+      },300);
+
+      this.dibujarRutas();
+if(this.userRole === "conductor"){
+   this.mostrarUbicacionConductor();
+}
+    },300);
+
   }
+  
+dibujarCalles() {
 
-  private fixLeafletIcons() {
-    // Solución alternativa: usar íconos de CDN o crear íconos personalizados
-    const iconUrl =
-      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png';
-    const iconRetinaUrl =
-      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png';
-    const shadowUrl =
-      'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png';
+  if (!this.calles || this.calles.length === 0) return;
 
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl,
-      iconUrl,
-      shadowUrl,
-    });
-  }
+  this.calles.forEach((calle:any) => {
 
-  private initializeMap() {
-    // Coordenadas iniciales (Bogotá, Colombia - ejemplo)
-    const initialLat = 4.711;
-    const initialLng = -74.0721;
+    if (!calle.latitud || !calle.longitud) return;
 
-    this.map = L.map('map').setView([initialLat, initialLng], 13);
+    const marker = L.marker([
+      calle.latitud,
+      calle.longitud
+    ]).addTo(this.map);
 
-    // Capa de mapa OpenStreetMap (gratuita, no requiere API key)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
-      maxZoom: 19,
-    }).addTo(this.map);
+    marker.bindPopup(`
+      <b>Punto de recolección</b><br>
+      ${calle.nombre || 'Sin nombre'}
+    `);
 
-    // Agregar marcadores y rutas después de inicializar
-    setTimeout(() => {
-      this.addRoutesToMap();
-      this.addStreetsToMap();
-      this.loading = false;
-    }, 1000);
-  }
+  });
 
-  private addRoutesToMap() {
-    if (!this.rutas || this.rutas.length === 0) return;
+}
+  dibujarRutas(){
 
-    this.rutas.forEach((ruta: any) => {
-      if (ruta.coordenadas && ruta.coordenadas.length > 0) {
-        // Crear polyline para la ruta
-        const latlngs = ruta.coordenadas.map((coord: any) => [
-          coord.lat,
-          coord.lng,
-        ]);
+    if(!this.rutas || this.rutas.length===0) return;
 
-        const routeLine = L.polyline(latlngs, {
-          color: ruta.color_hex || '#3388ff',
-          weight: 4,
-          opacity: 0.8,
-        }).addTo(this.map);
+    const capas:L.Polyline[]=[];
 
-        // Agregar popup con información de la ruta
-        routeLine.bindPopup(`
-          <b>${ruta.nombre_ruta}</b><br>
-          <span style="color: ${ruta.color_hex};">●</span> Ruta activa
-        `);
+    this.rutas.forEach(ruta=>{
+
+      if(!ruta.shape) return;
+
+      try{
+
+        const coords = JSON.parse(ruta.shape);
+
+        const linea = L.polyline(coords,{
+          color:ruta.color_hex || '#3388ff',
+          weight:5
+        });
+
+        linea.addTo(this.map);
+        capas.push(linea);
+
+      }catch(e){
+        console.log("error shape",ruta);
       }
+
     });
-  }
 
-  private addStreetsToMap() {
-    if (!this.calles || this.calles.length === 0) return;
+    if(capas.length>0){
 
-    this.calles.forEach((calle: any) => {
-      if (calle.lat && calle.lng) {
-        const marker = L.marker([calle.lat, calle.lng]).addTo(this.map);
+      const grupo = L.featureGroup(capas);
 
-        marker.bindPopup(`
-          <b>${calle.nombre_calle}</b><br>
-          <small>Zona: ${calle.zona || 'N/A'}</small>
-        `);
-      }
-    });
-  }
+      this.map.fitBounds(grupo.getBounds(),{
+        padding:[20,20]
+      });
 
-  // Método para centrar el mapa en una ubicación específica
-  centerMap(lat: number, lng: number, zoom: number = 15) {
-    if (this.map) {
-      this.map.setView([lat, lng], zoom);
     }
-  }
 
-  // Método para agregar un marcador temporal (útil para tracking GPS)
-  addTempMarker(lat: number, lng: number, title: string = 'Ubicación actual') {
-    if (this.map) {
-      const marker = L.marker([lat, lng]).addTo(this.map);
-      marker.bindPopup(`<b>${title}</b>`).openPopup();
-      return marker;
-    }
-    return null;
   }
+    centrarMapa(){
+
+  navigator.geolocation.getCurrentPosition((pos)=>{
+
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    this.map.setView([lat,lng],15);
+
+  });
+
+}
+mostrarUbicacionConductor(){
+
+  navigator.geolocation.watchPosition((pos)=>{
+
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    L.marker([lat,lng])
+      .addTo(this.map)
+      .bindPopup("🚛 Camión recolector");
+
+  });
+
+}
 }

@@ -11,13 +11,14 @@ import { AuthService } from '../../services/auth.service';
 import { RutasService } from '../../services/rutas/rutas';
 import { CallesService } from '../../services/calles/calles';
 import { MapViewComponent } from '../../components/map-view/map-view.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, MapViewComponent],
+  imports: [IonicModule, CommonModule, FormsModule, MapViewComponent],
 })
 export class HomePage implements OnInit {
   // Propiedad para el rol del usuario - añadido para manejar ciudadanos y conductores

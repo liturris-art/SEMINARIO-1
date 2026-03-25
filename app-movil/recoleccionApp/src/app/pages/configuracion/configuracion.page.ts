@@ -8,6 +8,8 @@ import { VehiculosService } from '../../services/vehiculos/vehiculos';
 import { RutasService } from '../../services/rutas/rutas';
 import { CallesService } from '../../services/calles/calles';
 
+import { Ruta } from 'src/interfaces/Rutas';
+
 @Component({
   selector: 'app-configuracion',
   templateUrl: './configuracion.page.html',
@@ -18,15 +20,15 @@ import { CallesService } from '../../services/calles/calles';
 export class ConfiguracionPage implements OnInit {
 
   vehiculos: any[] = [];
-  rutas: any[] = [];
+  rutas: Ruta[] = [];
   calles: any[] = [];
 
   vehiculoSeleccionado: any;
-  rutaSeleccionada: any;
+  rutaSeleccionada?: Ruta;
   calleSeleccionada: any;
 
-  cargandoDatos = false;
-  errorMessage = '';
+  cargandoDatos: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     private vehiculosService: VehiculosService,
@@ -35,37 +37,44 @@ export class ConfiguracionPage implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.cargarDatos();
   }
 
-  cargarDatos() {
+  cargarDatos(): void {
 
     this.cargandoDatos = true;
+    this.errorMessage = '';
 
+    // VEHICULOS
     this.vehiculosService.getVehiculos().subscribe({
       next: (res: any) => {
         this.vehiculos = res?.data ?? res ?? [];
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error cargando vehículos', err);
         this.errorMessage = 'No se pudieron cargar los vehículos';
       }
     });
 
+    // RUTAS
     this.rutasService.getRutas().subscribe({
       next: (res: any) => {
         this.rutas = res?.data ?? res ?? [];
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error cargando rutas', err);
         this.errorMessage = 'No se pudieron cargar las rutas';
       }
     });
 
+    // CALLES
     this.callesService.getCalles().subscribe({
       next: (res: any) => {
         this.calles = res?.data ?? res ?? [];
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error cargando calles', err);
         this.errorMessage = 'No se pudieron cargar las calles';
       },
       complete: () => {
@@ -75,7 +84,7 @@ export class ConfiguracionPage implements OnInit {
 
   }
 
-  continuar() {
+  continuar(): void {
 
     if (!this.vehiculoSeleccionado || !this.rutaSeleccionada) {
       alert('Seleccione vehículo y ruta');
@@ -85,11 +94,15 @@ export class ConfiguracionPage implements OnInit {
     const config = {
       vehiculo: this.vehiculoSeleccionado,
       ruta: this.rutaSeleccionada,
-      calle: this.calleSeleccionada,
+      calle: this.calleSeleccionada
     };
 
+    // guardar configuración local
     localStorage.setItem('config', JSON.stringify(config));
 
+    console.log('Configuración guardada:', config);
+
+    // navegar al mapa/home
     this.router.navigate(['/home']);
   }
 

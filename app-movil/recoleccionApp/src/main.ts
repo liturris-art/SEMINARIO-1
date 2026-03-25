@@ -23,20 +23,22 @@ import {
   personAddOutline,
   keyOutline,
   lockClosedOutline,
+  informationCircleOutline
 } from 'ionicons/icons';
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 
-// Registrar TODOS los iconos usados
+// Registrar TODOS los iconos usados en la app
 addIcons({
   'car-outline': carOutline,
   'finger-print-outline': fingerPrintOutline,
   'refresh-outline': refreshOutline,
-  'log-in': logInOutline,
-  'person-add': personAddOutline,
-  'key': keyOutline,
-  'lock-closed': lockClosedOutline,
+  'log-in-outline': logInOutline,
+  'person-add-outline': personAddOutline,
+  'key-outline': keyOutline,
+  'lock-closed-outline': lockClosedOutline,
+  'information-circle-outline': informationCircleOutline
 });
 
 bootstrapApplication(AppComponent, {
