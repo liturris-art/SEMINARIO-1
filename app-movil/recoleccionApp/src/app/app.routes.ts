@@ -2,24 +2,25 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  // 🔁 REDIRECCIÓN INICIAL
+
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full',
   },
 
-  // 🔓 RUTAS PÚBLICAS (sin protección)
   {
     path: 'login',
     loadComponent: () =>
       import('./pages/login/login.page').then((m) => m.LoginPage),
   },
+
   {
     path: 'register',
     loadComponent: () =>
       import('./pages/register/register.page').then((m) => m.RegisterPage),
   },
+
   {
     path: 'forgot-password',
     loadComponent: () =>
@@ -28,15 +29,13 @@ export const routes: Routes = [
       ),
   },
 
-  // 🔐 RUTAS PROTEGIDAS (requieren autenticación)
   {
-    path: 'configuracion',
+    path: 'menu',
     loadComponent: () =>
-      import('./pages/configuracion/configuracion.page').then(
-        (m) => m.ConfiguracionPage,
-      ),
+      import('./pages/menu/menu.page').then((m) => m.MenuPage),
     canActivate: [AuthGuard],
   },
+
   {
     path: 'home',
     loadComponent: () =>
@@ -44,9 +43,9 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
 
-  // 🚫 FALLBACK
   {
     path: '**',
     redirectTo: 'login',
-  },
+  }
+
 ];

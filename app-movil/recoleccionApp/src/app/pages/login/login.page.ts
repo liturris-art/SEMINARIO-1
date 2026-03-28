@@ -139,7 +139,7 @@ export class LoginPage implements OnInit {
 
       // Redirigir según rol
       if (rol === 'conductor') {
-        this.router.navigate(['/configuracion']);
+        this.router.navigate(['/menu']);
       } else {
         this.router.navigate(['/home']);
       }

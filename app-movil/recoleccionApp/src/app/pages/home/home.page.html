@@ -2,9 +2,9 @@
   <ion-toolbar>
 
     <ion-buttons slot="start">
-      <ion-button size="small" fill="clear" (click)="regresar()">
-        ← Volver
-      </ion-button>
+      <ion-button fill="clear" size="small" (click)="volver()">
+  ← Volver
+</ion-button>
     </ion-buttons>
 
     <ion-title>
@@ -16,10 +16,7 @@
 
 <ion-content class="ion-padding">
 
-  <!-- ============================= -->
-  <!-- 🚛 PANEL DEL CONDUCTOR -->
-  <!-- ============================= -->
-
+  <!-- PANEL CONDUCTOR -->
   <div *ngIf="userRole === 'conductor'">
 
     <ion-card>
@@ -30,7 +27,6 @@
 
       <ion-card-content>
 
-        <!-- VEHICULO -->
         <ion-item>
           <ion-label position="stacked">Seleccionar Vehículo</ion-label>
 
@@ -47,23 +43,17 @@
             </ion-select-option>
 
           </ion-select>
+
         </ion-item>
 
-        <!-- VALIDACION IDENTIDAD -->
-        <ion-button
-          expand="block"
-          color="medium"
-          (click)="validarIdentidad()">
-
+        <ion-button expand="block" color="medium" (click)="validarIdentidad()">
           🔐 Validar Identidad
-
         </ion-button>
 
         <p *ngIf="identidadValidada" style="color:green">
           ✅ Identidad validada
         </p>
 
-        <!-- ESTADO -->
         <p>
           Estado:
           <strong [ngStyle]="{ color: tracking ? 'green' : 'gray' }">
@@ -71,7 +61,6 @@
           </strong>
         </p>
 
-        <!-- INICIAR -->
         <ion-button
           expand="block"
           color="success"
@@ -82,7 +71,6 @@
 
         </ion-button>
 
-        <!-- DETENER -->
         <ion-button
           expand="block"
           color="danger"
@@ -97,8 +85,6 @@
 
     </ion-card>
 
-    <!-- MAPA DEL CONDUCTOR -->
-
     <app-map-view
       [rutas]="rutas"
       [calles]="calles"
@@ -112,11 +98,7 @@
 
   </div>
 
-
-  <!-- ============================= -->
-  <!-- 👤 PANEL CIUDADANO -->
-  <!-- ============================= -->
-
+  <!-- PANEL CIUDADANO -->
   <div *ngIf="userRole === 'ciudadano'">
 
     <h2>🗺️ Mapa de Rutas Disponibles</h2>
@@ -125,7 +107,17 @@
       Observa las rutas de recolección activas en tiempo real
     </p>
 
-    <!-- MAPA -->
+    <ion-button expand="block" (click)="mapView.activarMarcadoRuta()">
+      ✏️ Marcar ruta
+    </ion-button>
+
+    <ion-button expand="block" (click)="mapView.guardarRutaCiudadano()">
+      💾 Guardar ruta
+    </ion-button>
+
+    <ion-button expand="block" (click)="mapView.irARutaMasCercana()">
+      🧭 Ruta más cercana
+    </ion-button>
 
     <app-map-view
       #mapView
@@ -138,77 +130,7 @@
       📍 Centrar mapa en mi ubicación
     </ion-button>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-
-      <ion-fab-button size="small" color="light" (click)="mapView.centrarMapa()">
-        <ion-icon name="locate"></ion-icon>
-      </ion-fab-button>
-
-    </ion-fab>
-
-    <!-- INFO RUTAS -->
-
-    <div class="map-info">
-
-      <ion-card>
-
-        <ion-card-header>
-          <ion-card-title>
-            📊 Información de Rutas
-          </ion-card-title>
-        </ion-card-header>
-
-        <ion-card-content>
-
-          <p>
-            <strong>Rutas activas:</strong>
-            {{ rutas.length }}
-          </p>
-
-          <p>
-            <strong>Puntos de recolección:</strong>
-            {{ calles.length }}
-          </p>
-
-          <div class="rutas-list" *ngIf="rutas.length > 0">
-
-            <h4>Rutas disponibles:</h4>
-
-            <div class="ruta-item" *ngFor="let ruta of rutas">
-
-              <span
-                class="ruta-color"
-                [style.background-color]="ruta.color_hex || '#3388ff'">
-              </span>
-
-              <span class="ruta-name">
-                {{ ruta.nombre_ruta }}
-              </span>
-
-            </div>
-
-          </div>
-
-          <p *ngIf="rutas.length === 0" class="no-data">
-
-            <ion-icon name="information-circle-outline"></ion-icon>
-
-            No hay rutas activas en este momento.
-
-          </p>
-
-        </ion-card-content>
-
-      </ion-card>
-
-    </div>
-
   </div>
-
-
-  <!-- ============================= -->
-  <!-- CARGANDO -->
-  <!-- ============================= -->
 
   <div *ngIf="!userRole">
     <p>Cargando...</p>

@@ -12,6 +12,9 @@ import { RutasService } from '../../services/rutas/rutas';
 import { CallesService } from '../../services/calles/calles';
 import { MapViewComponent } from '../../components/map-view/map-view.component';
 import { FormsModule } from '@angular/forms';
+import { BiometricService } from 'src/app/services/biometric.service';
+import { Router } from '@angular/router';
+import { ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -29,8 +32,8 @@ export class HomePage implements OnInit {
 
   vehiculos: any[] = [];
   vehiculoSeleccionado: any = null;
-  identidadValidada: boolean = false;
 
+  identidadValidada: boolean = false;
   tracking: boolean = false;
 
   lat: number = 0;
@@ -46,29 +49,30 @@ export class HomePage implements OnInit {
     private http: HttpClient,
     private authService: AuthService,
     private rutasService: RutasService,
-    private callesService: CallesService
+    private callesService: CallesService,
+    private biometricService: BiometricService,
+    private router: Router
   ) {}
-
+volver(){
+  this.router.navigateByUrl('/menu');
+}
   async ngOnInit() {
 
     this.userRole = (await this.authService.getUserRole()) || '';
 
     console.log("Rol usuario:", this.userRole);
 
-    if (this.userRole === 'ciudadano') {
-
-      this.cargarDatosMapa();
-
-    }
+    this.cargarDatosMapa();
 
     if (this.userRole === 'conductor') {
-
       this.cargarVehiculos();
-      this.cargarDatosMapa();
-
     }
 
   }
+
+  /* ===============================
+     CARGAR RUTAS Y CALLES
+  =============================== */
 
   cargarDatosMapa() {
 
@@ -82,60 +86,64 @@ export class HomePage implements OnInit {
 
   }
 
+  /* ===============================
+     CARGAR VEHICULOS DE LA API
+  =============================== */
+
   cargarVehiculos() {
 
-    this.vehiculos = [
+    const url = `${environment.apiUrl}/vehiculos?perfil_id=${environment.perfilUrl}`;
 
-      { id: 1, placa: "ABC123", modelo: "Compactador" },
-      { id: 2, placa: "XYZ987", modelo: "Camión Recolector" },
-      { id: 3, placa: "DEF456", modelo: "Volqueta" }
+    this.http.get(url).subscribe((res: any) => {
 
-    ];
+      this.vehiculos = res.data || [];
+
+      console.log("Vehículos cargados desde API:", this.vehiculos);
+
+    });
 
   }
+
+  seleccionarVehiculo(vehiculo:any){
+    this.vehiculoSeleccionado = vehiculo;
+  }
+
+  /* ===============================
+     BIOMETRIA
+  =============================== */
 
   async validarIdentidad() {
 
-    try {
+    const ok = await this.biometricService.verifyIdentity();
 
-      const photo = await Camera.getPhoto({
-        quality: 50,
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera
-      });
-
-      if (photo) {
-
-        this.identidadValidada = true;
-        alert("✅ Identidad validada correctamente");
-
-      }
-
-    } catch {
-
-      alert("❌ Validación cancelada");
-
+    if(ok){
+      this.identidadValidada = true;
+      alert("✅ Identidad verificada");
+    }else{
+      alert("❌ No se pudo verificar identidad");
     }
 
   }
+
+  /* ===============================
+     INICIAR RECORRIDO
+  =============================== */
 
   async iniciarRecorrido() {
 
     if (!this.vehiculoSeleccionado) {
-
       alert("Seleccione un vehículo");
       return;
-
     }
 
     if (!this.identidadValidada) {
-
       alert("Debe validar identidad primero");
       return;
-
     }
 
     this.tracking = true;
+
+    await this.obtenerUbicacionInicial();
 
     await this.sincronizarDatos();
 
@@ -146,7 +154,7 @@ export class HomePage implements OnInit {
       this.lat = position.coords.latitude;
       this.lng = position.coords.longitude;
 
-      console.log("📍", this.lat, this.lng);
+      console.log("📍 GPS:", this.lat, this.lng);
 
       if (this.ultimaLat !== null && this.ultimaLng !== null) {
 
@@ -177,6 +185,15 @@ export class HomePage implements OnInit {
 
   }
 
+  async obtenerUbicacionInicial(){
+
+    const position = await Geolocation.getCurrentPosition();
+
+    this.lat = position.coords.latitude;
+    this.lng = position.coords.longitude;
+
+  }
+
   detenerRecorrido() {
 
     if (!this.tracking) return;
@@ -184,33 +201,25 @@ export class HomePage implements OnInit {
     this.tracking = false;
 
     if (this.watchId) {
-
       Geolocation.clearWatch({ id: this.watchId });
       this.watchId = null;
-
     }
 
     alert("Recorrido detenido");
 
   }
 
-  regresar() {
-
-    if (this.tracking) {
-
-      this.detenerRecorrido();
-
-    }
-
-    window.history.back();
-
-  }
+  /* ===============================
+     INTERNET
+  =============================== */
 
   hayInternet(): boolean {
-
     return navigator.onLine;
-
   }
+
+  /* ===============================
+     OFFLINE STORAGE
+  =============================== */
 
   async guardarOffline(data: any) {
 
@@ -226,6 +235,10 @@ export class HomePage implements OnInit {
     });
 
   }
+
+  /* ===============================
+     ENVIO A API
+  =============================== */
 
   private async postTrackingData(data: any) {
 
@@ -246,9 +259,7 @@ export class HomePage implements OnInit {
       } catch (error: any) {
 
         if (error?.status !== 404) {
-
           throw error;
-
         }
 
       }
@@ -294,7 +305,7 @@ export class HomePage implements OnInit {
       lat: this.lat,
       lng: this.lng,
       fecha: new Date(),
-      vehiculo: this.vehiculoSeleccionado
+      vehiculo: this.vehiculoSeleccionado?.placa
 
     };
 
@@ -318,6 +329,10 @@ export class HomePage implements OnInit {
 
   }
 
+  /* ===============================
+     DISTANCIA
+  =============================== */
+
   calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: number) {
 
     const R = 6371;
@@ -328,18 +343,20 @@ export class HomePage implements OnInit {
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos(this.toRad(lat1)) *
-        Math.cos(this.toRad(lat2)) *
-        Math.sin(dLon / 2) ** 2;
+      Math.cos(this.toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
 
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 
   }
 
   toRad(valor: number) {
-
     return (valor * Math.PI) / 180;
-
   }
+
+  /* ===============================
+     FOTO AUTOMATICA CADA KM
+  =============================== */
 
   async dispararHito() {
 
@@ -359,7 +376,7 @@ export class HomePage implements OnInit {
         lng: this.lng,
         fecha: new Date(),
         imagen: base64Image,
-        vehiculo: this.vehiculoSeleccionado
+        vehiculo: this.vehiculoSeleccionado?.placa
 
       };
 
