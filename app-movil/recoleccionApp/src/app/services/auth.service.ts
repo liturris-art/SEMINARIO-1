@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
 import { BiometricService } from './biometric.service';
 
@@ -79,7 +79,7 @@ export class AuthService {
   // RECUPERAR CONTRASEÑA
   async resetPassword(email: string) {
     const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:8100/reset-password',
+      redirectTo: window.location.origin + '/reset-password',
     });
 
     if (error) throw error;

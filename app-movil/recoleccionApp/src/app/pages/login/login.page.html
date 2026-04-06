@@ -1,120 +1,118 @@
-<!-- Mejoré la interfaz del login añadiendo un logo con ícono, título y subtítulo para que se vea más profesional -->
-<!-- También organicé mejor los botones y añadí íconos para la biometría -->
-<ion-header>
-  <ion-toolbar>
+<ion-header translucent="true">
+  <ion-toolbar color="light">
     <ion-title>Iniciar sesión</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="login-content">
-  <!-- Logo o ícono de la app -->
+
+  <!-- Logo de la app -->
   <div class="logo-container">
-    <ion-icon name="car-outline" size="large" color="primary"></ion-icon>
-    <h1 class="app-title">Recolección App</h1>
-    <p class="app-subtitle">Gestión de rutas y recorridos</p>
+    <ion-icon name="car-outline" class="logo-icon"></ion-icon>
+    <h1 class="app-title">Bienvenido</h1>
+    <p class="app-subtitle">Gestión inteligente de recorridos</p>
   </div>
 
-  <!-- Formulario de login con validaciones -->
+  <!-- Formulario -->
   <form [formGroup]="loginForm" (ngSubmit)="login()" class="form-container">
-    <ion-item
-      class="input-item"
-      [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-    >
+
+    <ion-item class="input-item">
       <ion-input
-        label="Email"
+        label="Correo electrónico"
         label-placement="floating"
         formControlName="email"
         type="email"
-        [disabled]="isBlocked"
-      >
+        [disabled]="isBlocked">
       </ion-input>
     </ion-item>
+
     <ion-note
       *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-      color="danger"
-      class="error-message"
-    >
+      color="danger">
       Email inválido
     </ion-note>
 
-    <ion-item
-      class="input-item"
-      [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-    >
+    <ion-item class="input-item">
       <ion-input
-        type="password"
         label="Contraseña"
         label-placement="floating"
+        type="password"
         formControlName="password"
-        [disabled]="isBlocked"
-      >
+        [disabled]="isBlocked">
       </ion-input>
     </ion-item>
+
     <ion-note
       *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-      color="danger"
-      class="error-message"
-    >
+      color="danger">
       Mínimo 6 caracteres
     </ion-note>
 
-    <!-- Indicador de bloqueo -->
+    <!-- Aviso de bloqueo -->
     <div *ngIf="isBlocked" class="block-notice">
-      <ion-icon name="lock-closed" color="danger"></ion-icon>
-      <ion-text color="danger">
-        <p>Cuenta bloqueada: {{ blockTimeRemaining }}s restantes</p>
-      </ion-text>
+      <ion-icon name="lock-closed"></ion-icon>
+      <p>Cuenta bloqueada {{ blockTimeRemaining }}s</p>
     </div>
 
+    <!-- Botón login -->
     <ion-button
       expand="block"
       type="submit"
       [disabled]="loginForm.invalid || isLoading || isBlocked"
-      class="login-btn"
-    >
-      <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
-      <ion-icon *ngIf="!isLoading" name="log-in" slot="start"></ion-icon>
-      {{ isLoading ? 'Iniciando...' : 'Iniciar sesión' }}
+      class="login-btn">
+
+      <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!isLoading" name="log-in-outline" slot="start"></ion-icon>
+
+      {{ isLoading ? 'Ingresando...' : 'Iniciar sesión' }}
+
     </ion-button>
 
+    <!-- Botones extra -->
     <div class="extra-buttons">
+
       <ion-button
         expand="block"
         fill="clear"
         (click)="goToRegister()"
-        class="register-btn"
-        [disabled]="isBlocked"
-      >
-        <ion-icon name="person-add" slot="start"></ion-icon>
+        [disabled]="isBlocked">
+
+        <ion-icon name="person-add-outline" slot="start"></ion-icon>
         Crear cuenta
+
       </ion-button>
 
       <ion-button
         expand="block"
         fill="clear"
         (click)="goToForgotPassword()"
-        class="forgot-btn"
-        [disabled]="isBlocked"
-      >
-        <ion-icon name="key" slot="start"></ion-icon>
-        ¿Olvidaste tu contraseña?
+        [disabled]="isBlocked">
+
+        <ion-icon name="key-outline" slot="start"></ion-icon>
+        Recuperar contraseña
+
       </ion-button>
+
     </div>
 
-    <!-- Botón biométrico (solo si está disponible) -->
+    <!-- Biometría -->
     <div *ngIf="biometricAvailable && !isBlocked" class="biometric-section">
-      <ion-text color="medium">
-        <p>O usa biometría</p>
-      </ion-text>
+
+      <p>O usa biometría</p>
+
       <ion-button
         expand="block"
         fill="outline"
         (click)="loginBiometric()"
-        class="biometric-btn"
-      >
-        <ion-icon name="finger-print" slot="start"></ion-icon>
-        Iniciar con huella/rostro
+        class="biometric-btn">
+
+        <ion-icon name="finger-print-outline" slot="start"></ion-icon>
+        Huella / Rostro
+
       </ion-button>
+
     </div>
+
   </form>
+
 </ion-content>

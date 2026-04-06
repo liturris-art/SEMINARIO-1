@@ -1,50 +1,181 @@
-.map-description {
-  text-align: center;
-  color: var(--ion-color-medium);
-  margin-bottom: 20px;
-  font-style: italic;
+/* ============================= */
+/* FONDO GENERAL DE LA PÁGINA */
+/* ============================= */
+
+.main-content{
+  --background: #f5f6fa;
 }
 
-.map-info {
-  margin-top: 20px;
+/* ============================= */
+/* TOOLBAR SUPERIOR */
+/* ============================= */
+
+ion-toolbar{
+  --background:#e91e63;
+  --color:white;
 }
 
-.rutas-list {
-  margin-top: 15px;
+/* ============================= */
+/* TARJETAS */
+/* ============================= */
+
+ion-card{
+  border-radius:18px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  background:white;
 }
 
-.ruta-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
+ion-card-title{
+  font-weight:600;
+  color:#333;
 }
 
-.ruta-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 10px;
+ion-card-subtitle{
+  color:#777;
 }
 
-.ruta-name {
-  font-size: 0.9rem;
-  font-weight: 500;
+/* ============================= */
+/* TITULOS */
+/* ============================= */
+
+.page-title{
+  text-align:center;
+  font-weight:600;
+  color:#333;
+  margin-bottom:10px;
 }
 
-.no-data {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ion-color-medium);
-  font-style: italic;
+/* ============================= */
+/* DESCRIPCION DEL MAPA */
+/* ============================= */
+
+.map-description{
+  text-align:center;
+  color:#777;
+  margin-bottom:20px;
+  font-style:italic;
 }
 
-ion-button {
-  margin-top: 10px;
-  border-radius: 10px;
+/* ============================= */
+/* BOTONES */
+/* ============================= */
+
+ion-button{
+  margin-top:10px;
+  height:48px;
+  --border-radius:12px;
 }
 
-ion-card {
-  border-radius: 14px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+/* botón principal */
+
+.action-btn{
+  --background:#e91e63;
+  --background-hover:#d81b60;
+  font-weight:600;
+}
+
+/* botón secundario */
+
+.action-outline{
+  --border-color:#e91e63;
+  --color:#e91e63;
+}
+
+/* ============================= */
+/* COLORES DE ACCIONES */
+/* ============================= */
+
+.validate-btn{
+  --background:#6b7280;
+  --color:white;
+}
+
+.start-btn{
+  --background:#22c55e;
+  --color:white;
+}
+
+.stop-btn{
+  --background:#ef4444;
+  --color:white;
+}
+
+/* ============================= */
+/* INPUTS Y SELECT */
+/* ============================= */
+
+ion-item{
+  --border-radius:10px;
+  margin-bottom:8px;
+}
+
+/* ============================= */
+/* ESTADO DEL RECORRIDO */
+/* ============================= */
+
+.status-ok{
+  color:green;
+  font-weight:500;
+  margin-top:8px;
+}
+
+.status-info{
+  margin-top:10px;
+  font-size:14px;
+}
+
+/* ============================= */
+/* INFORMACIÓN DE UBICACIÓN */
+/* ============================= */
+
+.location-info{
+  text-align:center;
+  margin-top:15px;
+  font-size:14px;
+  color:#555;
+}
+
+/* ============================= */
+/* MAPA */
+/* ============================= */
+
+.map-info{
+  margin-top:20px;
+}
+
+/* ============================= */
+/* TEXTO DE CARGA */
+/* ============================= */
+
+.loading{
+  text-align:center;
+  color:#777;
+  margin-top:20px;
+  font-style:italic;
+}
+
+/* ============================= */
+/* ELIMINAR EFECTOS AZULES DE IONIC */
+/* ============================= */
+
+ion-item{
+  --background-activated:transparent;
+  --background-focused:transparent;
+  --ripple-color:transparent;
+}
+
+/* ============================= */
+/* AJUSTE RESPONSIVE */
+/* ============================= */
+
+@media (max-width: 768px){
+
+  ion-card{
+    margin-top:10px;
+  }
+
+  ion-button{
+    height:46px;
+  }
+
 }

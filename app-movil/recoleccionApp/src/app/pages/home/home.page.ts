@@ -4,7 +4,7 @@ import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
+import { environment } from '../../../environments/environment';
 import { Preferences } from '@capacitor/preferences';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
@@ -12,7 +12,7 @@ import { RutasService } from '../../services/rutas/rutas';
 import { CallesService } from '../../services/calles/calles';
 import { MapViewComponent } from '../../components/map-view/map-view.component';
 import { FormsModule } from '@angular/forms';
-import { BiometricService } from 'src/app/services/biometric.service';
+import { BiometricService } from '../../services/biometric.service';
 import { Router } from '@angular/router';
 import { ViewChild } from '@angular/core';
 
@@ -245,7 +245,7 @@ volver(){
     const base = `${environment.apiUrl}`;
 
     const urls: string[] = environment.trackingEndpoints.map(
-      (endpoint) => `${base}/${endpoint}?perfil_id=${environment.perfilUrl}`
+      (endpoint: string) => `${base}/${endpoint}?perfil_id=${environment.perfilUrl}`
     );
 
     for (const url of urls) {

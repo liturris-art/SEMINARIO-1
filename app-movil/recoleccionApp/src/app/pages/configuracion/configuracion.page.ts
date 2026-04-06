@@ -1,109 +1,91 @@
-import { Component, OnInit } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
-import { VehiculosService } from '../../services/vehiculos/vehiculos';
-import { RutasService } from '../../services/rutas/rutas';
-import { CallesService } from '../../services/calles/calles';
+import {
+  IonContent,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonToggle,
+  IonButton,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardContent,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  LoadingController
+} from '@ionic/angular/standalone';
 
-import { Ruta } from 'src/interfaces/Rutas';
+import { AuthService } from '../../services/auth.service';
+import { BiometricService } from '../../services/biometric.service';
 
 @Component({
   selector: 'app-configuracion',
   templateUrl: './configuracion.page.html',
-  styleUrls: ['./configuracion.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule],
+  imports: [
+    IonContent,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonToggle,
+    IonButton,
+    IonCard,
+    IonCardHeader,
+    IonCardTitle,
+    IonCardContent,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    CommonModule
+  ]
 })
-export class ConfiguracionPage implements OnInit {
+export class ConfiguracionPage {
 
-  vehiculos: any[] = [];
-  rutas: Ruta[] = [];
-  calles: any[] = [];
-
-  vehiculoSeleccionado: any;
-  rutaSeleccionada?: Ruta;
-  calleSeleccionada: any;
-
-  cargandoDatos: boolean = false;
-  errorMessage: string = '';
+  biometricEnabled = false;
 
   constructor(
-    private vehiculosService: VehiculosService,
-    private rutasService: RutasService,
-    private callesService: CallesService,
-    private router: Router
+    private auth: AuthService,
+    private biometric: BiometricService,
+    private router: Router,
+    private loadingCtrl: LoadingController
   ) {}
 
-  ngOnInit(): void {
-    this.cargarDatos();
-  }
+  async toggleBiometric(event: any) {
 
-  cargarDatos(): void {
+    this.biometricEnabled = event.detail.checked;
 
-    this.cargandoDatos = true;
-    this.errorMessage = '';
-
-    // VEHICULOS
-    this.vehiculosService.getVehiculos().subscribe({
-      next: (res: any) => {
-        this.vehiculos = res?.data ?? res ?? [];
-      },
-      error: (err) => {
-        console.error('Error cargando vehículos', err);
-        this.errorMessage = 'No se pudieron cargar los vehículos';
-      }
-    });
-
-    // RUTAS
-    this.rutasService.getRutas().subscribe({
-      next: (res: any) => {
-        this.rutas = res?.data ?? res ?? [];
-      },
-      error: (err) => {
-        console.error('Error cargando rutas', err);
-        this.errorMessage = 'No se pudieron cargar las rutas';
-      }
-    });
-
-    // CALLES
-    this.callesService.getCalles().subscribe({
-      next: (res: any) => {
-        this.calles = res?.data ?? res ?? [];
-      },
-      error: (err) => {
-        console.error('Error cargando calles', err);
-        this.errorMessage = 'No se pudieron cargar las calles';
-      },
-      complete: () => {
-        this.cargandoDatos = false;
-      }
-    });
-
-  }
-
-  continuar(): void {
-
-    if (!this.vehiculoSeleccionado || !this.rutaSeleccionada) {
-      alert('Seleccione vehículo y ruta');
-      return;
+    if (this.biometricEnabled) {
+      console.log("Biometría activada");
+    } else {
+      await this.biometric.deleteCredentials();
+      console.log("Biometría desactivada");
     }
 
-    const config = {
-      vehiculo: this.vehiculoSeleccionado,
-      ruta: this.rutaSeleccionada,
-      calle: this.calleSeleccionada
-    };
+  }
 
-    // guardar configuración local
-    localStorage.setItem('config', JSON.stringify(config));
+  goResetPassword() {
+    this.router.navigate(['/forgot-password']);
+  }
 
-    console.log('Configuración guardada:', config);
+  async logout() {
 
-    // navegar al mapa/home
-    this.router.navigate(['/home']);
+    const loading = await this.loadingCtrl.create({
+      message: 'Cerrando sesión...',
+      spinner: 'crescent',
+      duration: 1500
+    });
+
+    await loading.present();
+
+    await this.auth.logout();
+
+    await loading.dismiss();
+
+    this.router.navigate(['/login']);
   }
 
 }

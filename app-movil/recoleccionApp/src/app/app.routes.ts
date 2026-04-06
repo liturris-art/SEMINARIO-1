@@ -29,6 +29,15 @@ export const routes: Routes = [
       ),
   },
 
+
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./pages/reset-password/reset-password.page').then(
+        (m) => m.ResetPasswordPage,
+      ),
+  },
+
   {
     path: 'menu',
     loadComponent: () =>
@@ -44,8 +53,16 @@ export const routes: Routes = [
   },
 
   {
+  path: 'configuracion',
+  loadComponent: () =>
+    import('./pages/configuracion/configuracion.page').then(
+      (m) => m.ConfiguracionPage
+    ),
+  canActivate: [AuthGuard],
+  },
+
+    {
     path: '**',
     redirectTo: 'login',
-  }
-
+  },
 ];

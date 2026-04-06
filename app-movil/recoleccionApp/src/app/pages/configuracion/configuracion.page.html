@@ -1,88 +1,38 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar style="--background:#e91e63; --color:white;">
     <ion-title>Configuración</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="settings-content ion-padding">
 
-  <ion-item *ngIf="cargandoDatos">
-    <ion-label>Cargando datos...</ion-label>
-    <ion-spinner slot="end"></ion-spinner>
-  </ion-item>
+  <ion-card class="settings-card">
 
-  <ion-item *ngIf="errorMessage">
-    <ion-label color="danger">{{ errorMessage }}</ion-label>
-  </ion-item>
+    <ion-card-header>
+      <ion-card-title>Seguridad</ion-card-title>
+    </ion-card-header>
 
-  <!-- VEHICULO -->
+    <ion-card-content>
 
-  <ion-item>
-    <ion-label>Vehículo</ion-label>
+      <ion-list>
 
-    <ion-select [(ngModel)]="vehiculoSeleccionado">
+        <ion-item>
+          <ion-label>Activar biometría</ion-label>
+          <ion-toggle (ionChange)="toggleBiometric($event)"></ion-toggle>
+        </ion-item>
 
-      <ion-select-option
-        *ngFor="let v of vehiculos"
-        [value]="v">
+        <ion-item button (click)="goResetPassword()">
+          <ion-label>Cambiar contraseña</ion-label>
+        </ion-item>
 
-        {{ v.placa || v.nombre }}
+      </ion-list>
 
-      </ion-select-option>
+    </ion-card-content>
 
-    </ion-select>
-  </ion-item>
+  </ion-card>
 
-  <!-- 🛣 RUTA -->
-
-<ion-item>
-  <ion-label>Ruta</ion-label>
-
-  <ion-select [(ngModel)]="rutaSeleccionada">
-
-    <ion-select-option
-      *ngFor="let r of rutas"
-      [value]="r">
-
-      <span
-        style="display:inline-block;
-        width:10px;
-        height:10px;
-        border-radius:50%;
-        margin-right:8px;"
-        [style.background]="r.color_hex || '#3880ff'">
-      </span>
-
-      {{ r.nombre_ruta }}
-
-    </ion-select-option>
-
-  </ion-select>
-
-</ion-item>
-
-  <!-- CALLES -->
-
-  <ion-item>
-
-    <ion-label>Calle</ion-label>
-
-    <ion-select [(ngModel)]="calleSeleccionada">
-
-      <ion-select-option
-        *ngFor="let c of calles"
-        [value]="c">
-
-        {{ c.nombre }}
-
-      </ion-select-option>
-
-    </ion-select>
-
-  </ion-item>
-
-  <ion-button expand="block" (click)="continuar()">
-    Iniciar Recorrido
+  <ion-button expand="block" class="logout-btn" (click)="logout()">
+    Cerrar sesión
   </ion-button>
 
 </ion-content>

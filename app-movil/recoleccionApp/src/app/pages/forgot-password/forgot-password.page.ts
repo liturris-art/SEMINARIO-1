@@ -1,12 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { RouterModule } from '@angular/router';
 import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
   IonContent,
   IonInput,
   IonButton,
-  IonItem
+  IonItem,
+  IonIcon
 } from '@ionic/angular/standalone';
 
 import { AuthService } from '../../services/auth.service';
@@ -14,14 +18,20 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-forgot-password',
   templateUrl: './forgot-password.page.html',
+  styleUrls: ['./forgot-password.page.scss'],
   standalone: true,
   imports: [
+    IonHeader,
+    IonToolbar,
+    IonTitle,
     IonContent,
     IonInput,
     IonButton,
     IonItem,
+    IonIcon,
     FormsModule,
-    CommonModule
+    CommonModule,
+    RouterModule
   ]
 })
 export class ForgotPasswordPage {

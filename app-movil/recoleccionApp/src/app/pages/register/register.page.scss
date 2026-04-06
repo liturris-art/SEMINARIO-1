@@ -1,114 +1,68 @@
-// Estilos para la página de registro - consistentes con el login
-.register-content {
+.register-content{
+  --background: #f7f7f7;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
 }
 
-.logo-container {
+.main-toolbar{
+  --background: #e91e63;
+  --color: white;
+}
+
+.logo-container{
   text-align: center;
-  margin-bottom: 30px;
+  margin-top: 40px;
+  margin-bottom: 25px;
 
-  ion-icon {
-    font-size: 4rem;
-    margin-bottom: 10px;
+  ion-icon{
+    font-size: 60px;
+    color: #e91e63;
   }
 
-  .app-title {
-    font-size: 2rem;
+  .app-title{
+    font-size: 28px;
     font-weight: bold;
-    margin: 10px 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    color: #333;
   }
 
-  .app-subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin: 0;
+  .app-subtitle{
+    color: #777;
+    font-size: 14px;
   }
 }
 
-.form-container {
+.form-card{
   width: 100%;
-  max-width: 400px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  max-width: 420px;
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
 }
 
-.input-item {
-  --border-radius: 10px;
-  --padding-start: 15px;
-  --inner-padding-end: 15px;
+.input-item{
+  --border-radius: 12px;
   margin-bottom: 15px;
-
-  ion-input {
-    --placeholder-color: #666;
-    --color: #333;
-  }
-
-  ion-select {
-    --placeholder-color: #666;
-    --color: #333;
-  }
-
-  &.error {
-    --border-color: var(--ion-color-danger);
-    --color: var(--ion-color-danger);
-  }
 }
 
-.error-message {
-  font-size: 0.8rem;
-  margin-bottom: 15px;
-  padding-left: 15px;
+.error-message{
+  font-size: 12px;
+  margin-left: 10px;
 }
 
-.register-btn {
-  --border-radius: 10px;
-  --background: #4caf50;
-  --background-hover: #45a049;
-  --background-activated: #3e8e41;
-  margin: 20px 0 10px 0;
-  font-weight: 600;
-
-  ion-icon {
-    margin-right: 8px;
-  }
+.register-btn{
+  margin-top: 20px;
+  height: 50px;
+  --border-radius: 12px;
+  --background: #e91e63;
+  --background-hover: #d81b60;
+  font-weight: bold;
 }
 
-.login-link {
-  margin-top: 15px;
-
-  .login-btn {
-    --color: #666;
-    font-size: 0.9rem;
-
-    ion-icon {
-      margin-right: 5px;
-    }
-  }
-}
-
-// Responsive design
-@media (max-width: 480px) {
-  .form-container {
-    padding: 20px;
-    margin: 10px;
-  }
-
-  .logo-container {
-    margin-bottom: 20px;
-
-    .app-title {
-      font-size: 1.5rem;
-    }
-  }
+.login-btn{
+  margin-top: 10px;
+  --color: #e91e63;
+  font-weight: 500;
 }

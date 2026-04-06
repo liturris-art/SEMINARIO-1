@@ -1,136 +1,131 @@
-// Estilos mejorados para la página de login - versión estudiante
-// Aquí añadí colores y layout para que se vea más profesional y amigable
-
 .login-content {
+  --background: #f5f6fa;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  align-items: center;
+
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
 }
+
+/* LOGO */
 
 .logo-container {
   text-align: center;
-  margin-bottom: 40px;
-
-  ion-icon {
-    font-size: 4rem;
-    margin-bottom: 10px;
-  }
-
-  .app-title {
-    font-size: 2rem;
-    font-weight: bold;
-    margin: 10px 0;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-
-  .app-subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin: 0;
-  }
+  margin-bottom: 30px;
 }
+
+.logo-icon {
+  font-size: 70px;
+  color: #e91e63;
+}
+
+.app-title {
+  font-size: 26px;
+  font-weight: bold;
+  color: #333;
+}
+
+.app-subtitle {
+  color: #777;
+  font-size: 14px;
+}
+
+/* FORMULARIO */
 
 .form-container {
+
   width: 100%;
-  max-width: 400px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  max-width: 380px;
+
+  background: white;
+
+  border-radius: 16px;
+
+  padding: 25px;
+
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.1);
 }
+
+/* INPUT */
 
 .input-item {
-  --border-radius: 10px;
-  --padding-start: 15px;
-  --inner-padding-end: 15px;
-  margin-bottom: 15px;
 
-  ion-input {
-    --placeholder-color: #666;
-    --color: #333;
-  }
+  --border-radius: 12px;
 
-  &.error {
-    --border-color: var(--ion-color-danger);
-    --color: var(--ion-color-danger);
-  }
+  margin-bottom: 10px;
 }
 
-.error-message {
-  font-size: 0.8rem;
-  margin-bottom: 15px;
-  padding-left: 15px;
-}
-
-.block-notice {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(244, 67, 54, 0.1);
-  border: 1px solid var(--ion-color-danger);
-  border-radius: 8px;
-  padding: 10px;
-  margin-bottom: 15px;
-
-  ion-icon {
-    margin-right: 8px;
-    font-size: 1.2rem;
-  }
-
-  p {
-    margin: 0;
-    font-weight: 500;
-  }
-}
+/* BOTÓN LOGIN */
 
 .login-btn {
-  --border-radius: 10px;
-  --background: #4caf50;
-  --background-hover: #45a049;
-  --background-activated: #3e8e41;
-  margin: 20px 0 10px;
+
+  --background: #e91e63;
+
+  --background-hover: #d81b60;
+
+  --border-radius: 12px;
+
+  height: 48px;
+
   font-weight: bold;
-  height: 50px;
+
+  margin-top: 15px;
 }
+
+/* BOTONES SECUNDARIOS */
 
 .extra-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 15px 0;
+
+  margin-top: 10px;
+
+  ion-button {
+    font-size: 14px;
+  }
 }
 
-.register-btn,
-.forgot-btn {
-  --color: #666;
-  font-size: 0.9rem;
+/* BIOMETRÍA */
+
+.biometric-section {
+
+  margin-top: 20px;
+
+  text-align: center;
+
+  p {
+    color: #666;
+    font-size: 13px;
+  }
 }
 
 .biometric-btn {
-  --border-radius: 10px;
-  margin-top: 20px;
-  font-weight: bold;
-  height: 50px;
 
-  ion-icon {
-    margin-right: 8px;
-  }
+  --border-color: #e91e63;
+
+  --color: #e91e63;
+
+  --border-radius: 12px;
+
+  height: 45px;
 }
 
-// Responsivo para móviles
-@media (max-width: 576px) {
-  .form-container {
-    padding: 20px;
-    margin: 0 10px;
-  }
+/* BLOQUEO */
 
-  .app-title {
-    font-size: 1.5rem;
-  }
+.block-notice {
+
+  background: #ffe5ea;
+
+  border: 1px solid #e91e63;
+
+  color: #e91e63;
+
+  border-radius: 10px;
+
+  padding: 10px;
+
+  text-align: center;
+
+  margin-bottom: 10px;
 }

@@ -48,7 +48,6 @@ import {
     IonButton,
     IonIcon,
     IonSpinner,
-    IonText,
     IonNote,
     CommonModule,
     FormsModule,

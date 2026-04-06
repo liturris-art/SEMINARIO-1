@@ -1,0 +1,69 @@
+/* fondo de la página */
+
+.settings-content{
+  --background:#f5f6fa;
+}
+
+
+/* toolbar */
+
+ion-toolbar{
+  --background:#e91e63;
+  --color:white;
+}
+
+
+/* tarjeta */
+
+.settings-card{
+  border-radius:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+  background:white;
+}
+
+
+/* lista */
+
+ion-list{
+  background:transparent;
+}
+
+
+/* items */
+
+ion-item{
+
+  --background:white;
+
+  --background-activated:transparent;
+  --background-focused:transparent;
+
+  margin-bottom:6px;
+}
+
+
+/* toggle */
+
+ion-toggle{
+  --handle-background:#e91e63;
+  --background-checked:#f8bbd0;
+}
+
+
+/* botón cerrar sesión */
+
+.logout-btn{
+
+  margin-top:20px;
+  height:48px;
+
+  --background:#e91e63;
+  --background-activated:#d81b60;
+  --background-hover:#d81b60;
+
+  --color:#ffffff;
+
+  --border-radius:10px;
+
+  font-weight:600;
+}

@@ -1,13 +1,17 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
   templateUrl: './menu.page.html',
   styleUrls: ['./menu.page.scss'],
-  imports: [IonicModule]
+  imports: [
+    IonicModule,
+    CommonModule
+  ]
 })
 export class MenuPage {
 
@@ -23,6 +27,10 @@ export class MenuPage {
 
   configuracion(){
     this.router.navigate(['/configuracion']);
+  }
+
+  logout(){
+    this.router.navigate(['/login']);
   }
 
 }

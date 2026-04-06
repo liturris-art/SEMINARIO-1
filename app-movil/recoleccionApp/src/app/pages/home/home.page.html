@@ -1,10 +1,10 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-toolbar style="--background:#e91e63; --color:white;">
 
     <ion-buttons slot="start">
-      <ion-button fill="clear" size="small" (click)="volver()">
-  ← Volver
-</ion-button>
+      <ion-button fill="clear" size="small" (click)="volver()" style="color:white;">
+        Volver
+      </ion-button>
     </ion-buttons>
 
     <ion-title>
@@ -14,15 +14,17 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="main-content">
 
   <!-- PANEL CONDUCTOR -->
   <div *ngIf="userRole === 'conductor'">
 
-    <ion-card>
+    <ion-card class="main-card">
 
       <ion-card-header>
-        <ion-card-title>🚛 Preparar Recorrido</ion-card-title>
+        <ion-card-title>
+          Preparar Recorrido
+        </ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
@@ -46,38 +48,41 @@
 
         </ion-item>
 
-        <ion-button expand="block" color="medium" (click)="validarIdentidad()">
-          🔐 Validar Identidad
+        <!-- VALIDAR IDENTIDAD -->
+        <ion-button expand="block" class="validate-btn" (click)="validarIdentidad()">
+          Validar identidad
         </ion-button>
 
-        <p *ngIf="identidadValidada" style="color:green">
-          ✅ Identidad validada
+        <p *ngIf="identidadValidada" class="status-ok">
+          Identidad validada
         </p>
 
-        <p>
+        <p class="status-info">
           Estado:
           <strong [ngStyle]="{ color: tracking ? 'green' : 'gray' }">
             {{ tracking ? 'En seguimiento' : 'Detenido' }}
           </strong>
         </p>
 
+        <!-- INICIAR RECORRIDO -->
         <ion-button
           expand="block"
-          color="success"
+          class="start-btn"
           [disabled]="!vehiculoSeleccionado || !identidadValidada || tracking"
           (click)="iniciarRecorrido()">
 
-          ▶️ Iniciar Recorrido
+          Iniciar recorrido
 
         </ion-button>
 
+        <!-- DETENER RECORRIDO -->
         <ion-button
           expand="block"
-          color="danger"
+          class="stop-btn"
           [disabled]="!tracking"
           (click)="detenerRecorrido()">
 
-          ⛔ Detener Recorrido
+          Detener recorrido
 
         </ion-button>
 
@@ -91,9 +96,9 @@
       [userRole]="userRole">
     </app-map-view>
 
-    <p *ngIf="lat && lng">
-      📍 Lat: {{ lat }} <br>
-      📍 Lng: {{ lng }}
+    <p *ngIf="lat && lng" class="location-info">
+      Lat: {{ lat }} <br>
+      Lng: {{ lng }}
     </p>
 
   </div>
@@ -101,22 +106,22 @@
   <!-- PANEL CIUDADANO -->
   <div *ngIf="userRole === 'ciudadano'">
 
-    <h2>🗺️ Mapa de Rutas Disponibles</h2>
+    <h2 class="page-title">Mapa de rutas disponibles</h2>
 
     <p class="map-description">
-      Observa las rutas de recolección activas en tiempo real
+      Observa las rutas de recolección activas en tiempo real.
     </p>
 
-    <ion-button expand="block" (click)="mapView.activarMarcadoRuta()">
-      ✏️ Marcar ruta
+    <ion-button expand="block" class="action-btn" (click)="mapView.activarMarcadoRuta()">
+      Marcar ruta
     </ion-button>
 
-    <ion-button expand="block" (click)="mapView.guardarRutaCiudadano()">
-      💾 Guardar ruta
+    <ion-button expand="block" class="action-outline" (click)="mapView.guardarRutaCiudadano()">
+      Guardar ruta
     </ion-button>
 
-    <ion-button expand="block" (click)="mapView.irARutaMasCercana()">
-      🧭 Ruta más cercana
+    <ion-button expand="block" class="action-outline" (click)="mapView.irARutaMasCercana()">
+      Ruta más cercana
     </ion-button>
 
     <app-map-view
@@ -126,14 +131,14 @@
       [userRole]="userRole">
     </app-map-view>
 
-    <ion-button expand="block" (click)="mapView.centrarMapa()">
-      📍 Centrar mapa en mi ubicación
+    <ion-button expand="block" class="action-outline" (click)="mapView.centrarMapa()">
+      Centrar mapa en mi ubicación
     </ion-button>
 
   </div>
 
   <div *ngIf="!userRole">
-    <p>Cargando...</p>
+    <p class="loading">Cargando...</p>
   </div>
 
 </ion-content>
