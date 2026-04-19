@@ -18,7 +18,7 @@ export class AppComponent {
     private biometricService: BiometricService,
     private router: Router
   ) {
-    //this.initializeApp(); // 🔥 ACTIVADO
+    this.initializeApp(); // 🔥 ACTIVADO
   }
 
   async initializeApp() {
@@ -27,19 +27,24 @@ export class AppComponent {
 
       const currentUrl = this.router.url;
 
+      // 🔥 NO INTERFERIR CON LOGIN / REGISTER / RESET
       if (
         currentUrl.includes('login') ||
-        currentUrl.includes('register')
+        currentUrl.includes('register') ||
+        currentUrl.includes('reset-password')
       ) {
         return;
       }
 
-      const user = await this.authService.getUser();
+      // 🔥 1. VERIFICAR SESIÓN
+      const isLogged = await this.authService.isLoggedIn();
 
-      if (user) {
+      if (isLogged) {
+        console.log('Usuario ya logueado');
         return;
       }
 
+      // 🔥 2. BIOMETRÍA
       const biometricAvailable = await this.biometricService.isAvailable();
 
       if (biometricAvailable) {
@@ -57,18 +62,21 @@ export class AppComponent {
               credentials.password
             );
 
-            if (response.user) {
+            if (response?.user) {
+              console.log('Login automático exitoso');
+              this.router.navigate(['/home']); // 🔥 redirige al dashboard
               return;
             }
           }
         }
       }
 
+      // 🔥 3. SI TODO FALLA → LOGIN
       this.router.navigate(['/login']);
 
     } catch (error) {
 
-      console.log(error);
+      console.error('Error en initializeApp:', error);
       this.router.navigate(['/login']);
 
     }

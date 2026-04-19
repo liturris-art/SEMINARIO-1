@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-menu',
@@ -15,22 +16,38 @@ import { CommonModule } from '@angular/common';
 })
 export class MenuPage {
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
-  iniciarRuta(){
-    this.router.navigate(['/navegacion']);
+  verPerfil(){
+    this.router.navigate(['/perfil']);
   }
 
-  verMapa(){
-    this.router.navigate(['/home']);
+  historial(){
+    this.router.navigate(['/historial']);
+  }
+
+  reportes(){
+    this.router.navigate(['/reportes']);
+  }
+
+  sincronizar(){
+    console.log(" Sincronizando datos...");
+    // luego aquí puedes llamar tu servicio real
   }
 
   configuracion(){
     this.router.navigate(['/configuracion']);
   }
 
-  logout(){
-    this.router.navigate(['/login']);
+  async logout(){
+    await this.authService.logout(); // 🔥 logout real
+  }
+
+  verMapa(){
+    this.router.navigate(['/home']);
   }
 
 }

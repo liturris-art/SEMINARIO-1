@@ -1,9 +1,9 @@
 <!-- MENU LATERAL -->
-<ion-menu contentId="main-content" class="menu-panel">
+<ion-menu contentId="main-content" side="start">
 
   <ion-header>
     <ion-toolbar style="--background:#e91e63; --color:white;">
-      <ion-title>Panel del conductor</ion-title>
+      <ion-title>Menú Principal</ion-title>
     </ion-toolbar>
   </ion-header>
 
@@ -24,24 +24,44 @@
     <!-- OPCIONES -->
     <ion-list class="menu-list">
 
-      <ion-item button (click)="iniciarRuta()">
-        <ion-icon name="car-outline" slot="start"></ion-icon>
-        <ion-label>Iniciar recorrido</ion-label>
+      <!-- PERFIL -->
+      <ion-item button (click)="verPerfil()">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        <ion-label>Ver perfil</ion-label>
       </ion-item>
 
+      <!-- MAPA -->
       <ion-item button (click)="verMapa()">
         <ion-icon name="map-outline" slot="start"></ion-icon>
         <ion-label>Ver mapa</ion-label>
       </ion-item>
 
+      <!-- 🔥 NUEVAS FUNCIONES -->
+      <ion-item button (click)="historial()">
+        <ion-icon name="time-outline" slot="start"></ion-icon>
+        <ion-label>Historial</ion-label>
+      </ion-item>
+
+      <ion-item button (click)="reportes()">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        <ion-label>Reportes</ion-label>
+      </ion-item>
+
+      <ion-item button (click)="sincronizar()">
+        <ion-icon name="sync-outline" slot="start"></ion-icon>
+        <ion-label>Sincronizar</ion-label>
+      </ion-item>
+
+      <!-- CONFIG -->
       <ion-item button (click)="configuracion()">
         <ion-icon name="settings-outline" slot="start"></ion-icon>
         <ion-label>Configuración</ion-label>
       </ion-item>
 
-      <ion-item button (click)="logout()" class="logout-item">
+      <!-- LOGOUT -->
+      <ion-item button (click)="logout()">
         <ion-icon name="log-out-outline" slot="start"></ion-icon>
-        <ion-label>Cerrar sesión</ion-label>
+        <ion-label>Salir</ion-label>
       </ion-item>
 
     </ion-list>
@@ -50,26 +70,26 @@
 
 </ion-menu>
 
-
-<!-- CONTENIDO PRINCIPAL -->
+<!-- CONTENEDOR PRINCIPAL -->
 <div id="main-content" class="main-container">
 
+  <!-- HEADER -->
   <ion-header>
     <ion-toolbar style="--background:#e91e63; --color:white;">
 
       <ion-buttons slot="start">
-        <!-- RAYITAS DEL MENU EN BLANCO -->
         <ion-menu-button style="color:white;"></ion-menu-button>
       </ion-buttons>
 
-      <ion-title>Panel del Conductor</ion-title>
+      <ion-title>Bienvenido/a</ion-title>
 
     </ion-toolbar>
   </ion-header>
 
+  <!-- CONTENIDO -->
   <ion-content class="dashboard-content">
 
-    <!-- TARJETA BIENVENIDA -->
+    <!-- TARJETA -->
     <ion-card class="welcome-card">
 
       <ion-card-header>
@@ -91,21 +111,4 @@
 
     </ion-card>
 
-    <!-- ACCIONES RAPIDAS -->
-    <div class="quick-actions">
-
-      <ion-button expand="block" class="action-btn" (click)="iniciarRuta()">
-        <ion-icon name="play-outline" slot="start"></ion-icon>
-        Iniciar recorrido
-      </ion-button>
-
-      <ion-button expand="block" fill="outline" class="action-outline" (click)="verMapa()">
-        <ion-icon name="map-outline" slot="start"></ion-icon>
-        Ver mapa
-      </ion-button>
-
-    </div>
-
-  </ion-content>
-
-</div>
+  

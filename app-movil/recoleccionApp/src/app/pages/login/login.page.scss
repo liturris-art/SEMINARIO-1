@@ -2,11 +2,26 @@
   --background: #f5f6fa;
 
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
 
-  padding: 20px;
+  height: 100%;
+
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 380px;
+
+  margin: 0 auto;   
+
+  background: white;
+  border-radius: 16px;
+  padding: 25px;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
 /* LOGO */

@@ -50,7 +50,7 @@ export class ResetPasswordPage {
   async showAlert(message: string) {
     const alert = await this.alertCtrl.create({
       header: 'Información',
-      message: message,
+      message,
       buttons: ['OK']
     });
 
@@ -77,11 +77,8 @@ export class ResetPasswordPage {
 
     try {
 
-      const { error } = await this.auth.supabase.auth.updateUser({
-        password: this.password
-      });
-
-      if (error) throw error;
+      // ✅ CORREGIDO: SIN { error }
+      await this.auth.updatePassword(this.password);
 
       await loading.dismiss();
 
@@ -101,7 +98,7 @@ export class ResetPasswordPage {
     } catch (error: any) {
 
       await loading.dismiss();
-      this.showAlert(error.message);
+      this.showAlert(error.message || "Error al actualizar");
 
     }
 

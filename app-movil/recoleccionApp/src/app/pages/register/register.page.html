@@ -6,120 +6,168 @@
 
 <ion-content class="register-content">
 
-  <!-- Logo / título -->
-  <div class="logo-container">
-    <ion-icon name="person-add-outline"></ion-icon>
-    <h1 class="app-title">Registro</h1>
-    <p class="app-subtitle">Únete a Recolección App</p>
-  </div>
+  <!-- 🔥 WRAPPER CLAVE PARA CENTRAR -->
+  <div class="form-wrapper">
 
-  <!-- Tarjeta de formulario -->
-  <div class="form-card">
+    <!-- LOGO -->
+    <div class="logo-container">
+      <ion-icon name="person-add-outline"></ion-icon>
+      <h1 class="app-title">Registro</h1>
+      <p class="app-subtitle">Únete a Recolección App</p>
+    </div>
 
-    <form [formGroup]="registerForm" (ngSubmit)="register()">
+    <!-- FORMULARIO -->
+    <div class="form-card">
 
-      <ion-item class="input-item"
-        [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+      <form [formGroup]="registerForm" (ngSubmit)="register()">
 
-        <ion-icon name="mail-outline" slot="start"></ion-icon>
+        <!-- NOMBRE -->
+        <ion-item class="input-item"
+          [class.error]="registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched">
 
-        <ion-input
-          label="Email"
-          label-placement="floating"
-          formControlName="email"
-          type="email">
-        </ion-input>
+          <ion-icon name="person-outline" slot="start"></ion-icon>
 
-      </ion-item>
+          <ion-input
+            label="Nombre completo"
+            label-placement="floating"
+            formControlName="nombre">
+          </ion-input>
 
-      <ion-note
-        *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
-        color="danger"
-        class="error-message">
-        Email inválido
-      </ion-note>
+        </ion-item>
 
+        <!-- DOCUMENTO -->
+        <ion-item class="input-item"
+          [class.error]="registerForm.get('documento')?.invalid && registerForm.get('documento')?.touched">
 
-      <ion-item class="input-item"
-        [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+          <ion-icon name="card-outline" slot="start"></ion-icon>
 
-        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-input
+            label="Documento"
+            label-placement="floating"
+            formControlName="documento">
+          </ion-input>
 
-        <ion-input
-          type="password"
-          label="Contraseña"
-          label-placement="floating"
-          formControlName="password">
-        </ion-input>
+        </ion-item>
 
-      </ion-item>
+        <!-- TELEFONO -->
+        <ion-item class="input-item"
+          [class.error]="registerForm.get('telefono')?.invalid && registerForm.get('telefono')?.touched">
 
-      <ion-note
-        *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
-        color="danger"
-        class="error-message">
-        Mínimo 8 caracteres
-      </ion-note>
+          <ion-icon name="call-outline" slot="start"></ion-icon>
 
+          <ion-input
+            label="Teléfono"
+            label-placement="floating"
+            formControlName="telefono"
+            type="tel">
+          </ion-input>
 
-      <ion-item class="input-item"
-        [class.error]="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched">
+        </ion-item>
 
-        <ion-icon name="people-outline" slot="start"></ion-icon>
+        <!-- EMAIL -->
+        <ion-item class="input-item"
+          [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
 
-        <ion-select
-          label="Tipo de usuario"
-          label-placement="floating"
-          formControlName="rol">
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
 
-          <ion-select-option value="ciudadano">
-            👤 Ciudadano - Observar rutas
-          </ion-select-option>
+          <ion-input
+            label="Email"
+            label-placement="floating"
+            formControlName="email"
+            type="email">
+          </ion-input>
 
-          <ion-select-option value="conductor">
-            🚛 Conductor - Gestionar recorridos
-          </ion-select-option>
+        </ion-item>
 
-        </ion-select>
+        <ion-note
+          *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+          color="danger"
+          class="error-message">
+          Email inválido
+        </ion-note>
 
-      </ion-item>
+        <!-- PASSWORD -->
+        <ion-item class="input-item"
+          [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
 
-      <ion-note
-        *ngIf="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched"
-        color="danger"
-        class="error-message">
-        Selecciona un tipo de usuario
-      </ion-note>
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
 
+          <ion-input
+            type="password"
+            label="Contraseña"
+            label-placement="floating"
+            formControlName="password">
+          </ion-input>
 
-      <ion-button
-        expand="block"
-        type="submit"
-        [disabled]="registerForm.invalid || isLoading"
-        class="register-btn">
+        </ion-item>
 
-        <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+        <ion-note
+          *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+          color="danger"
+          class="error-message">
+          Mínimo 8 caracteres
+        </ion-note>
 
-        <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start"></ion-icon>
+        <!-- ROL -->
+        <ion-item class="input-item"
+          [class.error]="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched">
 
-        {{ isLoading ? 'Registrando...' : 'Crear cuenta' }}
+          <ion-icon name="people-outline" slot="start"></ion-icon>
 
-      </ion-button>
+          <ion-select
+            label="Tipo de usuario"
+            label-placement="floating"
+            formControlName="rol">
 
+            <ion-select-option value="ciudadano">
+              👤 Ciudadano
+            </ion-select-option>
 
-      <ion-button
-        expand="block"
-        fill="clear"
-        routerLink="/login"
-        class="login-btn">
+            <ion-select-option value="conductor">
+              🚛 Conductor
+            </ion-select-option>
 
-        <ion-icon name="log-in-outline" slot="start"></ion-icon>
+          </ion-select>
 
-        Ya tengo cuenta
+        </ion-item>
 
-      </ion-button>
+        <ion-note
+          *ngIf="registerForm.get('rol')?.invalid && registerForm.get('rol')?.touched"
+          color="danger"
+          class="error-message">
+          Selecciona un tipo de usuario
+        </ion-note>
 
-    </form>
+        <!-- BOTON -->
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="registerForm.invalid || isLoading"
+          class="register-btn">
+
+          <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+
+          <ion-icon *ngIf="!isLoading" name="person-add-outline" slot="start"></ion-icon>
+
+          {{ isLoading ? 'Registrando...' : 'Crear cuenta' }}
+
+        </ion-button>
+
+        <!-- LOGIN -->
+        <ion-button
+          expand="block"
+          fill="clear"
+          routerLink="/login"
+          class="login-btn">
+
+          <ion-icon name="log-in-outline" slot="start"></ion-icon>
+          Ya tengo cuenta
+
+        </ion-button>
+
+      </form>
+
+    </div>
 
   </div>
 

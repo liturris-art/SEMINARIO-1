@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Geolocation } from '@capacitor/geolocation';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { IonicModule } from '@ionic/angular';
@@ -12,9 +12,7 @@ import { RutasService } from '../../services/rutas/rutas';
 import { CallesService } from '../../services/calles/calles';
 import { MapViewComponent } from '../../components/map-view/map-view.component';
 import { FormsModule } from '@angular/forms';
-import { BiometricService } from '../../services/biometric.service';
 import { Router } from '@angular/router';
-import { ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -25,177 +23,140 @@ import { ViewChild } from '@angular/core';
 })
 export class HomePage implements OnInit {
 
-  userRole: string = '';
+  @ViewChild(MapViewComponent) mapView!: MapViewComponent;
+
+  userRole = '';
 
   rutas: any[] = [];
   calles: any[] = [];
-
   vehiculos: any[] = [];
   vehiculoSeleccionado: any = null;
 
-  identidadValidada: boolean = false;
-  tracking: boolean = false;
+  identidadValidada = false;
+  tracking = false;
 
-  lat: number = 0;
-  lng: number = 0;
+  lat = 0;
+  lng = 0;
+  watchId: string | null = null;
 
-  watchId: any;
-
-  distanciaAcumulada: number = 0;
+  distanciaAcumulada = 0;
   ultimaLat: number | null = null;
   ultimaLng: number | null = null;
+
+  recorrido: any[] = [];
 
   constructor(
     private http: HttpClient,
     private authService: AuthService,
     private rutasService: RutasService,
     private callesService: CallesService,
-    private biometricService: BiometricService,
     private router: Router
   ) {}
-volver(){
-  this.router.navigateByUrl('/menu');
-}
+
   async ngOnInit() {
+    try {
+      this.userRole = await this.authService.getUserRole();
+      this.cargarDatosMapa();
 
-    this.userRole = (await this.authService.getUserRole()) || '';
+      if (this.esConductor()) {
+        this.cargarVehiculos();
+      }
 
-    console.log("Rol usuario:", this.userRole);
+      window.addEventListener('online', () => {
+        this.sincronizarDatos();
+      });
 
-    this.cargarDatosMapa();
-
-    if (this.userRole === 'conductor') {
-      this.cargarVehiculos();
+    } catch (error) {
+      console.error('Error inicializando:', error);
     }
+  }
 
+  volver() {
+    this.router.navigateByUrl('/menu');
+  }
+
+  esConductor(): boolean {
+    return this.userRole?.toLowerCase().trim() === 'conductor';
   }
 
   /* ===============================
-     CARGAR RUTAS Y CALLES
+     MAPA
   =============================== */
-
   cargarDatosMapa() {
-
-    this.rutasService.getRutas().subscribe((res: any) => {
-      this.rutas = res.data || [];
+    this.rutasService.getRutas().subscribe(res => {
+      this.rutas = res?.data || [];
     });
 
-    this.callesService.getCalles().subscribe((res: any) => {
-      this.calles = res.data || [];
+    this.callesService.getCalles().subscribe(res => {
+      this.calles = res?.data || [];
     });
-
   }
 
   /* ===============================
-     CARGAR VEHICULOS DE LA API
+     VEHICULOS
   =============================== */
-
   cargarVehiculos() {
+    const url = `${environment.apiUrl}/vehiculos`;
 
-    const url = `${environment.apiUrl}/vehiculos?perfil_id=${environment.perfilUrl}`;
-
-    this.http.get(url).subscribe((res: any) => {
-
-      this.vehiculos = res.data || [];
-
-      console.log("Vehículos cargados desde API:", this.vehiculos);
-
+    this.http.get<any>(url, {
+      params: { perfil_id: environment.perfilUrl }
+    }).subscribe({
+      next: res => this.vehiculos = res?.data || res,
+      error: err => console.error('Error vehículos:', err)
     });
-
   }
 
-  seleccionarVehiculo(vehiculo:any){
-    this.vehiculoSeleccionado = vehiculo;
+  seleccionarVehiculo(v: any) {
+    this.vehiculoSeleccionado = v;
   }
 
   /* ===============================
-     BIOMETRIA
+     BIOMETRIA SIMPLIFICADA
   =============================== */
-
   async validarIdentidad() {
+    try {
+      await Camera.getPhoto({
+        quality: 80,
+        resultType: CameraResultType.Base64,
+        source: CameraSource.Camera,
+      });
 
-    const ok = await this.biometricService.verifyIdentity();
-
-    if(ok){
       this.identidadValidada = true;
-      alert("✅ Identidad verificada");
-    }else{
-      alert("❌ No se pudo verificar identidad");
-    }
+      alert('✅ Rostro verificado');
 
+    } catch {
+      alert('❌ Verificación fallida');
+    }
   }
 
   /* ===============================
-     INICIAR RECORRIDO
+     TRACKING
   =============================== */
-
   async iniciarRecorrido() {
 
-    if (!this.vehiculoSeleccionado) {
-      alert("Seleccione un vehículo");
-      return;
-    }
-
-    if (!this.identidadValidada) {
-      alert("Debe validar identidad primero");
-      return;
-    }
+    if (!this.vehiculoSeleccionado) return alert('Seleccione vehículo');
+    if (!this.identidadValidada) return alert('Valide identidad');
 
     this.tracking = true;
 
     await this.obtenerUbicacionInicial();
-
     await this.sincronizarDatos();
 
-    this.watchId = await Geolocation.watchPosition({}, async (position) => {
+    this.watchId = await Geolocation.watchPosition({}, pos => {
+      if (!pos) return;
 
-      if (!position) return;
+      this.lat = pos.coords.latitude;
+      this.lng = pos.coords.longitude;
 
-      this.lat = position.coords.latitude;
-      this.lng = position.coords.longitude;
+      this.recorrido.push({ lat: this.lat, lng: this.lng, fecha: new Date() });
 
-      console.log("📍 GPS:", this.lat, this.lng);
+      this.mapView?.actualizarCamion(this.lat, this.lng);
 
-      if (this.ultimaLat !== null && this.ultimaLng !== null) {
-
-        const distancia = this.calcularDistancia(
-          this.ultimaLat,
-          this.ultimaLng,
-          this.lat,
-          this.lng
-        );
-
-        this.distanciaAcumulada += distancia;
-
-        if (this.distanciaAcumulada >= 1) {
-
-          await this.dispararHito();
-          this.distanciaAcumulada = 0;
-
-        }
-
-      }
-
-      this.ultimaLat = this.lat;
-      this.ultimaLng = this.lng;
-
-      this.enviarCoordenadas();
-
+      this.procesarDistancia();
     });
-
-  }
-
-  async obtenerUbicacionInicial(){
-
-    const position = await Geolocation.getCurrentPosition();
-
-    this.lat = position.coords.latitude;
-    this.lng = position.coords.longitude;
-
   }
 
   detenerRecorrido() {
-
     if (!this.tracking) return;
 
     this.tracking = false;
@@ -205,138 +166,45 @@ volver(){
       this.watchId = null;
     }
 
-    alert("Recorrido detenido");
-
+    alert('Recorrido detenido');
   }
 
-  /* ===============================
-     INTERNET
-  =============================== */
-
-  hayInternet(): boolean {
-    return navigator.onLine;
-  }
-
-  /* ===============================
-     OFFLINE STORAGE
-  =============================== */
-
-  async guardarOffline(data: any) {
-
-    const { value } = await Preferences.get({ key: 'datosOffline' });
-
-    let datos = value ? JSON.parse(value) : [];
-
-    datos.push(data);
-
-    await Preferences.set({
-      key: 'datosOffline',
-      value: JSON.stringify(datos),
-    });
-
-  }
-
-  /* ===============================
-     ENVIO A API
-  =============================== */
-
-  private async postTrackingData(data: any) {
-
-    const base = `${environment.apiUrl}`;
-
-    const urls: string[] = environment.trackingEndpoints.map(
-      (endpoint: string) => `${base}/${endpoint}?perfil_id=${environment.perfilUrl}`
-    );
-
-    for (const url of urls) {
-
-      try {
-
-        await firstValueFrom(this.http.post(url, data));
-
-        return true;
-
-      } catch (error: any) {
-
-        if (error?.status !== 404) {
-          throw error;
-        }
-
-      }
-
-    }
-
-    return false;
-
-  }
-
-  async sincronizarDatos() {
-
-    if (!this.hayInternet()) return;
-
-    const { value } = await Preferences.get({ key: 'datosOffline' });
-
-    if (!value) return;
-
-    const datos = JSON.parse(value);
-
-    for (let item of datos) {
-
-      try {
-
-        await this.postTrackingData(item);
-
-      } catch {
-
-        break;
-
-      }
-
-    }
-
-    await Preferences.remove({ key: 'datosOffline' });
-
-  }
-
-  async enviarCoordenadas() {
-
-    const data = {
-
-      lat: this.lat,
-      lng: this.lng,
-      fecha: new Date(),
-      vehiculo: this.vehiculoSeleccionado?.placa
-
-    };
-
-    if (this.hayInternet()) {
-
-      try {
-
-        await this.postTrackingData(data);
-
-      } catch {
-
-        await this.guardarOffline(data);
-
-      }
-
-    } else {
-
-      await this.guardarOffline(data);
-
-    }
-
+  async obtenerUbicacionInicial() {
+    const pos = await Geolocation.getCurrentPosition();
+    this.lat = pos.coords.latitude;
+    this.lng = pos.coords.longitude;
   }
 
   /* ===============================
      DISTANCIA
   =============================== */
+  procesarDistancia() {
+    if (this.ultimaLat == null || this.ultimaLng == null) {
+      this.ultimaLat = this.lat;
+      this.ultimaLng = this.lng;
+      return;
+    }
+
+    const d = this.calcularDistancia(
+      this.ultimaLat, this.ultimaLng,
+      this.lat, this.lng
+    );
+
+    if (d >= 0.005) this.enviarCoordenadas();
+
+    this.distanciaAcumulada += d;
+
+    if (this.distanciaAcumulada >= 1) {
+      this.dispararHito();
+      this.distanciaAcumulada = 0;
+    }
+
+    this.ultimaLat = this.lat;
+    this.ultimaLng = this.lng;
+  }
 
   calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: number) {
-
     const R = 6371;
-
     const dLat = this.toRad(lat2 - lat1);
     const dLon = this.toRad(lon2 - lon1);
 
@@ -347,63 +215,108 @@ volver(){
       Math.sin(dLon / 2) ** 2;
 
     return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-
   }
 
-  toRad(valor: number) {
-    return (valor * Math.PI) / 180;
+  toRad(v: number) {
+    return (v * Math.PI) / 180;
   }
 
   /* ===============================
-     FOTO AUTOMATICA CADA KM
+     ENVIO DATOS
   =============================== */
+  async enviarCoordenadas() {
+    const data = {
+      lat: this.lat,
+      lng: this.lng,
+      fecha: new Date(),
+      vehiculo: this.vehiculoSeleccionado?.placa
+    };
 
+    if (navigator.onLine) {
+      try {
+        await this.postTrackingData(data);
+      } catch {
+        await this.guardarOffline(data);
+      }
+    } else {
+      await this.guardarOffline(data);
+    }
+  }
+
+  private async postTrackingData(data: any) {
+    const base = environment.apiUrl;
+
+    for (const endpoint of environment.trackingEndpoints) {
+      try {
+        await firstValueFrom(
+          this.http.post(`${base}/${endpoint}?perfil_id=${environment.perfilUrl}`, data)
+        );
+        return true;
+      } catch (err: any) {
+        if (err?.status !== 404) throw err;
+      }
+    }
+    return false;
+  }
+
+  /* ===============================
+     OFFLINE
+  =============================== */
+  async guardarOffline(data: any) {
+    const { value } = await Preferences.get({ key: 'datosOffline' });
+    const datos = value ? JSON.parse(value) : [];
+
+    datos.push(data);
+    if (datos.length > 200) datos.shift();
+
+    await Preferences.set({
+      key: 'datosOffline',
+      value: JSON.stringify(datos)
+    });
+  }
+
+  async sincronizarDatos() {
+    if (!navigator.onLine) return;
+
+    const { value } = await Preferences.get({ key: 'datosOffline' });
+    if (!value) return;
+
+    const datos = JSON.parse(value);
+
+    for (const item of datos) {
+      try {
+        await this.postTrackingData(item);
+      } catch {
+        break;
+      }
+    }
+
+    await Preferences.remove({ key: 'datosOffline' });
+  }
+
+  /* ===============================
+     FOTO CADA KM
+  =============================== */
   async dispararHito() {
-
     try {
-
       const image = await Camera.getPhoto({
         quality: 50,
         resultType: CameraResultType.Base64,
         source: CameraSource.Camera,
       });
 
-      const base64Image = 'data:image/jpeg;base64,' + image.base64String;
-
       const data = {
-
         lat: this.lat,
         lng: this.lng,
         fecha: new Date(),
-        imagen: base64Image,
+        imagen: `data:image/jpeg;base64,${image.base64String}`,
         vehiculo: this.vehiculoSeleccionado?.placa
-
       };
 
-      if (this.hayInternet()) {
-
-        try {
-
-          await this.postTrackingData(data);
-
-        } catch {
-
-          await this.guardarOffline(data);
-
-        }
-
-      } else {
-
-        await this.guardarOffline(data);
-
-      }
+      await this.enviarCoordenadas();
 
     } catch {
-
-      console.log("📸 Foto cancelada");
-
+      console.log('📸 cancelado');
     }
-
   }
-
 }

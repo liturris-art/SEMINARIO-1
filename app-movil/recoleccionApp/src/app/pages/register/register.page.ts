@@ -25,8 +25,7 @@ import {
   ToastController,
 } from '@ionic/angular/standalone';
 
-import { SupabaseService } from '../../services/supabase.service';
-import { LoggerService } from '../../services/logger.service';
+import { AuthService } from '../../services/auth.service'; // ✅ CORRECTO
 
 @Component({
   selector: 'app-register',
@@ -53,103 +52,79 @@ import { LoggerService } from '../../services/logger.service';
   ],
 })
 export class RegisterPage {
-  email: string = '';
-  password: string = '';
-  rol: string = '';
+
   registerForm: FormGroup;
   isLoading: boolean = false;
 
   constructor(
-    private supabaseService: SupabaseService,
+    private auth: AuthService,
     private router: Router,
     private formBuilder: FormBuilder,
-    private logger: LoggerService,
     private toastController: ToastController,
   ) {
+
     this.registerForm = this.formBuilder.group({
+      nombre: ['', [Validators.required]],
+      documento: ['', [Validators.required]],
+      telefono: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       rol: ['', [Validators.required]],
     });
+
   }
 
   async register() {
+
     if (this.registerForm.invalid) {
-      this.showToast(
-        'Por favor completa todos los campos correctamente.',
-        'warning',
-      );
+      this.showToast('Completa todos los campos correctamente', 'warning');
       return;
     }
 
     this.isLoading = true;
 
     try {
-      const { email, password, rol } = this.registerForm.value;
 
-      this.logger.log(`Intentando registrar usuario: ${email} con rol: ${rol}`);
-
-      const { data, error } = await this.supabaseService.supabase.auth.signUp({
+      const {
+        nombre,
+        documento,
+        telefono,
         email,
         password,
-        options: {
-          data: {
-            rol: rol,
-          },
-        },
+        rol
+      } = this.registerForm.value;
+
+      // 🔥 usamos AuthService correctamente
+      await this.auth.register(email, password, {
+        nombre,
+        documento,
+        telefono,
+        rol
       });
 
-      if (error) {
-        this.logger.error('Error en registro de Supabase', error);
+      this.showToast('Usuario registrado correctamente', 'success');
 
-        // Manejar errores específicos de Supabase
-        if (error.message.includes('already registered')) {
-          this.showToast(
-            'Este email ya está registrado. Intenta iniciar sesión.',
-            'warning',
-          );
-        } else if (error.message.includes('Invalid email')) {
-          this.showToast('Email inválido. Verifica el formato.', 'warning');
-        } else if (
-          error.message.includes('network') ||
-          error.message.includes('fetch')
-        ) {
-          this.showToast('Error de conexión. Verifica tu internet.', 'danger');
-        } else {
-          this.showToast(`Error en registro: ${error.message}`, 'danger');
-        }
-        return;
-      }
-
-      this.logger.log(
-        `Usuario registrado exitosamente: ${data.user?.email || 'unknown'}`,
-      );
-
-      if (data.user && !data.user.email_confirmed_at) {
-        this.showToast(
-          'Usuario registrado. Confirma tu email antes de iniciar sesión.',
-          'success',
-        );
-      } else {
-        this.showToast('Usuario registrado correctamente.', 'success');
-      }
-
-      // Limpiar formulario
       this.registerForm.reset();
 
-      // Redirigir al login después de un breve delay
       setTimeout(() => {
         this.router.navigate(['/login']);
-      }, 2000);
+      }, 1500);
+
     } catch (error: any) {
-      this.logger.error('Error inesperado en registro', error);
-      this.showToast(
-        'Error inesperado al registrar usuario. Intenta nuevamente.',
-        'danger',
-      );
+
+      // 🔥 manejo limpio de errores
+      if (error.message?.includes('already registered')) {
+        this.showToast('Este correo ya está registrado', 'warning');
+      } else if (error.message?.includes('Invalid email')) {
+        this.showToast('Email inválido', 'warning');
+      } else {
+        this.showToast(error.message || 'Error en registro', 'danger');
+      }
+
     } finally {
       this.isLoading = false;
     }
+
   }
 
   private async showToast(
@@ -159,7 +134,7 @@ export class RegisterPage {
     const toast = await this.toastController.create({
       message,
       color,
-      duration: 4000,
+      duration: 3000,
       position: 'top',
     });
     await toast.present();

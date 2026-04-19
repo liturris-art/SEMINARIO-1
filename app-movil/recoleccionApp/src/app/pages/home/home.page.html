@@ -1,14 +1,16 @@
 <ion-header>
-  <ion-toolbar style="--background:#e91e63; --color:white;">
+  <ion-toolbar class="main-toolbar">
 
     <ion-buttons slot="start">
-      <ion-button fill="clear" size="small" (click)="volver()" style="color:white;">
+      <ion-button fill="clear" size="small" (click)="volver()" class="back-btn">
         Volver
       </ion-button>
     </ion-buttons>
 
     <ion-title>
-      {{ userRole === 'conductor' ? 'Panel del Conductor' : 'Observador de Rutas' }}
+      {{ userRole.toLowerCase().trim() === 'conductor'
+        ? 'Panel del Conductor'
+        : 'Observador de Rutas' }}
     </ion-title>
 
   </ion-toolbar>
@@ -16,129 +18,166 @@
 
 <ion-content class="main-content">
 
-  <!-- PANEL CONDUCTOR -->
-  <div *ngIf="userRole === 'conductor'">
+  <!-- CONTENEDOR GENERAL -->
+  <div class="container">
 
-    <ion-card class="main-card">
+    <!-- =========================
+         CONDUCTOR
+    ========================== -->
+    <div *ngIf="userRole.toLowerCase().trim() === 'conductor'" class="card-container">
 
-      <ion-card-header>
-        <ion-card-title>
-          Preparar Recorrido
-        </ion-card-title>
-      </ion-card-header>
+      <ion-card class="main-card">
 
-      <ion-card-content>
+        <ion-card-header>
+          <ion-card-title>Preparar Recorrido</ion-card-title>
+        </ion-card-header>
 
-        <ion-item>
-          <ion-label position="stacked">Seleccionar Vehículo</ion-label>
+        <ion-card-content>
 
-          <ion-select
-            placeholder="Seleccione un vehículo"
-            [(ngModel)]="vehiculoSeleccionado">
+          <!-- VEHICULO -->
+          <ion-item class="input-item">
+            <ion-label position="stacked">Vehículo</ion-label>
 
-            <ion-select-option
-              *ngFor="let v of vehiculos"
-              [value]="v.id">
+            <ion-select
+              placeholder="Seleccione"
+              [(ngModel)]="vehiculoSeleccionado">
 
-              {{ v.placa }} - {{ v.modelo }}
+              <ion-select-option
+                *ngFor="let v of vehiculos"
+                [value]="v">
 
-            </ion-select-option>
+                {{ v.placa }} - {{ v.modelo || 'Sin modelo' }}
 
-          </ion-select>
+              </ion-select-option>
 
-        </ion-item>
+            </ion-select>
+          </ion-item>
 
-        <!-- VALIDAR IDENTIDAD -->
-        <ion-button expand="block" class="validate-btn" (click)="validarIdentidad()">
-          Validar identidad
-        </ion-button>
+          <!-- VALIDAR -->
+          <ion-button
+            expand="block"
+            class="primary-btn"
+            (click)="validarIdentidad()">
 
-        <p *ngIf="identidadValidada" class="status-ok">
-          Identidad validada
-        </p>
+            Validar identidad
+          </ion-button>
 
-        <p class="status-info">
-          Estado:
-          <strong [ngStyle]="{ color: tracking ? 'green' : 'gray' }">
-            {{ tracking ? 'En seguimiento' : 'Detenido' }}
-          </strong>
-        </p>
+          <p *ngIf="identidadValidada" class="status-ok">
+            ✔ Identidad validada
+          </p>
 
-        <!-- INICIAR RECORRIDO -->
-        <ion-button
-          expand="block"
-          class="start-btn"
-          [disabled]="!vehiculoSeleccionado || !identidadValidada || tracking"
-          (click)="iniciarRecorrido()">
+          <!-- ESTADO -->
+          <p class="status-info">
+            Estado:
+            <strong [ngClass]="tracking ? 'text-success' : 'text-muted'">
+              {{ tracking ? 'En seguimiento' : 'Detenido' }}
+            </strong>
+          </p>
 
-          Iniciar recorrido
+          <!-- INICIAR -->
+          <ion-button
+            expand="block"
+            class="success-btn"
+            [disabled]="!vehiculoSeleccionado || !identidadValidada || tracking"
+            (click)="iniciarRecorrido()">
 
-        </ion-button>
+            Iniciar recorrido
+          </ion-button>
 
-        <!-- DETENER RECORRIDO -->
-        <ion-button
-          expand="block"
-          class="stop-btn"
-          [disabled]="!tracking"
-          (click)="detenerRecorrido()">
+          <!-- DETENER -->
+          <ion-button
+            expand="block"
+            class="danger-btn"
+            [disabled]="!tracking"
+            (click)="detenerRecorrido()">
 
-          Detener recorrido
+            Detener recorrido
+          </ion-button>
 
-        </ion-button>
+        </ion-card-content>
 
-      </ion-card-content>
+      </ion-card>
 
-    </ion-card>
+      <!-- MAPA -->
+      <app-map-view
+        #mapView
+        [rutas]="rutas"
+        [calles]="calles"
+        [userRole]="userRole">
+      </app-map-view>
 
-    <app-map-view
-      [rutas]="rutas"
-      [calles]="calles"
-      [userRole]="userRole">
-    </app-map-view>
+      <!-- COORDENADAS -->
+      <p *ngIf="lat && lng" class="location-info">
+        📍 {{ lat }} , {{ lng }}
+      </p>
 
-    <p *ngIf="lat && lng" class="location-info">
-      Lat: {{ lat }} <br>
-      Lng: {{ lng }}
-    </p>
+    </div>
 
-  </div>
+    <!-- =========================
+         CIUDADANO
+    ========================== -->
+    <div *ngIf="userRole.toLowerCase().trim() === 'ciudadano'" class="card-container">
 
-  <!-- PANEL CIUDADANO -->
-  <div *ngIf="userRole === 'ciudadano'">
+      <ion-card class="main-card">
 
-    <h2 class="page-title">Mapa de rutas disponibles</h2>
+        <ion-card-header>
+          <ion-card-title>Rutas disponibles</ion-card-title>
+        </ion-card-header>
 
-    <p class="map-description">
-      Observa las rutas de recolección activas en tiempo real.
-    </p>
+        <ion-card-content>
 
-    <ion-button expand="block" class="action-btn" (click)="mapView.activarMarcadoRuta()">
-      Marcar ruta
-    </ion-button>
+          <p class="map-description">
+            Observa rutas en tiempo real.
+          </p>
 
-    <ion-button expand="block" class="action-outline" (click)="mapView.guardarRutaCiudadano()">
-      Guardar ruta
-    </ion-button>
+          <ion-button
+            expand="block"
+            class="primary-btn"
+            (click)="mapView.activarMarcadoRuta()">
+            Marcar ruta
+          </ion-button>
 
-    <ion-button expand="block" class="action-outline" (click)="mapView.irARutaMasCercana()">
-      Ruta más cercana
-    </ion-button>
+          <ion-button
+            expand="block"
+            class="outline-btn"
+            (click)="mapView.guardarRutaCiudadano()">
+            Guardar ruta
+          </ion-button>
 
-    <app-map-view
-      #mapView
-      [rutas]="rutas"
-      [calles]="calles"
-      [userRole]="userRole">
-    </app-map-view>
+          <ion-button
+            expand="block"
+            class="outline-btn"
+            (click)="mapView.irARutaMasCercana()">
+            Ruta más cercana
+          </ion-button>
 
-    <ion-button expand="block" class="action-outline" (click)="mapView.centrarMapa()">
-      Centrar mapa en mi ubicación
-    </ion-button>
+        </ion-card-content>
 
-  </div>
+      </ion-card>
 
-  <div *ngIf="!userRole">
-    <p class="loading">Cargando...</p>
+      <!-- MAPA -->
+      <app-map-view
+        #mapView
+        [rutas]="rutas"
+        [calles]="calles"
+        [userRole]="userRole">
+      </app-map-view>
+
+      <ion-button
+        expand="block"
+        class="outline-btn"
+        (click)="mapView.centrarMapa()">
+        Centrar mapa
+      </ion-button>
+
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="!userRole" class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Cargando...</p>
+    </div>
+
   </div>
 
 </ion-content>
