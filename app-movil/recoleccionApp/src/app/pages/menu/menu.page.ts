@@ -42,9 +42,6 @@ export class MenuPage {
     this.router.navigate(['/configuracion']);
   }
 
-  async logout(){
-    await this.authService.logout(); // 🔥 logout real
-  }
 
   verMapa(){
     this.router.navigate(['/home']);

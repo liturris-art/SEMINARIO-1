@@ -1,4 +1,6 @@
+<!-- ===================== -->
 <!-- MENU LATERAL -->
+<!-- ===================== -->
 <ion-menu contentId="main-content" side="start">
 
   <ion-header>
@@ -24,19 +26,16 @@
     <!-- OPCIONES -->
     <ion-list class="menu-list">
 
-      <!-- PERFIL -->
       <ion-item button (click)="verPerfil()">
         <ion-icon name="person-outline" slot="start"></ion-icon>
         <ion-label>Ver perfil</ion-label>
       </ion-item>
 
-      <!-- MAPA -->
       <ion-item button (click)="verMapa()">
         <ion-icon name="map-outline" slot="start"></ion-icon>
         <ion-label>Ver mapa</ion-label>
       </ion-item>
 
-      <!-- 🔥 NUEVAS FUNCIONES -->
       <ion-item button (click)="historial()">
         <ion-icon name="time-outline" slot="start"></ion-icon>
         <ion-label>Historial</ion-label>
@@ -52,16 +51,9 @@
         <ion-label>Sincronizar</ion-label>
       </ion-item>
 
-      <!-- CONFIG -->
       <ion-item button (click)="configuracion()">
         <ion-icon name="settings-outline" slot="start"></ion-icon>
         <ion-label>Configuración</ion-label>
-      </ion-item>
-
-      <!-- LOGOUT -->
-      <ion-item button (click)="logout()">
-        <ion-icon name="log-out-outline" slot="start"></ion-icon>
-        <ion-label>Salir</ion-label>
       </ion-item>
 
     </ion-list>
@@ -70,45 +62,48 @@
 
 </ion-menu>
 
-<!-- CONTENEDOR PRINCIPAL -->
-<div id="main-content" class="main-container">
 
-  <!-- HEADER -->
-  <ion-header>
-    <ion-toolbar style="--background:#e91e63; --color:white;">
+<!-- ===================== -->
+<!-- HEADER -->
+<!-- ===================== -->
+<ion-header>
+  <ion-toolbar style="--background:#e91e63; --color:white;">
 
-      <ion-buttons slot="start">
-        <ion-menu-button style="color:white;"></ion-menu-button>
-      </ion-buttons>
+    <!-- ☰ BOTÓN -->
+    <ion-buttons slot="start">
+      <ion-menu-button style="color:white;"></ion-menu-button>
+    </ion-buttons>
 
-      <ion-title>Bienvenido/a</ion-title>
+    <ion-title>Bienvenido/a</ion-title>
 
-    </ion-toolbar>
-  </ion-header>
+  </ion-toolbar>
+</ion-header>
 
-  <!-- CONTENIDO -->
-  <ion-content class="dashboard-content">
 
-    <!-- TARJETA -->
-    <ion-card class="welcome-card">
+<!-- ===================== -->
+<!-- CONTENIDO PRINCIPAL -->
+<!-- ===================== -->
+<ion-content id="main-content" class="dashboard-content">
 
-      <ion-card-header>
+  <ion-card class="welcome-card">
 
-        <ion-card-title>
-          <ion-icon name="car-outline"></ion-icon>
-          Bienvenido
-        </ion-card-title>
+    <ion-card-header>
 
-        <ion-card-subtitle>
-          Gestión inteligente de recorridos
-        </ion-card-subtitle>
+      <ion-card-title>
+        <ion-icon name="car-outline"></ion-icon>
+        Bienvenido
+      </ion-card-title>
 
-      </ion-card-header>
+      <ion-card-subtitle>
+        Gestión inteligente de recorridos
+      </ion-card-subtitle>
 
-      <ion-card-content>
-        Utilice el botón ☰ para abrir el menú lateral y acceder a las funciones del sistema.
-      </ion-card-content>
+    </ion-card-header>
 
-    </ion-card>
+    <ion-card-content>
+      Utilice el botón ☰ para abrir el menú lateral y acceder a las funciones del sistema.
+    </ion-card-content>
 
-  
+  </ion-card>
+
+</ion-content>
