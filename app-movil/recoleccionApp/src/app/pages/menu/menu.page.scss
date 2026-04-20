@@ -1,86 +1,41 @@
-/* PANEL MENU */
-.menu-panel {
-  --width: 260px;
-  z-index: 1000; /* 🔥 asegura que esté encima */
-}
-
-/* PERFIL */
-.profile-section {
-  text-align: center;
-  padding: 25px 15px;
-  background: #f8f9fb;
-}
-
-.profile-avatar {
-  margin: 0 auto 10px auto; /* 🔥 centrado */
-  width: 80px;
-  height: 80px;
-}
-
-.profile-section h2 {
-  margin: 10px 0 5px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.profile-section p {
-  color: #777;
-  font-size: 13px;
-}
-
-/* LISTA MENU */
-.menu-list ion-item {
-  --padding-start: 16px;
-  font-size: 15px;
-}
-
-/* CONTENIDO PRINCIPAL */
-.main-container {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* DASHBOARD */
 .dashboard-content {
+  --background: #f5f6fa;
   padding: 15px;
 }
 
-/* TARJETA BIENVENIDA */
+/* TARJETA */
 .welcome-card {
-  border-radius: 16px;
-  padding: 10px;
-  margin-top: 10px;
-
+  border-radius: 18px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
 
-.welcome-card ion-card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-}
-
-.welcome-card ion-card-subtitle {
-  font-size: 14px;
-  color: #666;
-}
-
-.welcome-card ion-card-content {
-  font-size: 14px;
-  line-height: 1.5;
-  margin-top: 5px;
-}
-
-/* ACCIONES */
-.quick-actions {
-  margin-top: 20px;
-}
-
-.action-outline {
-  --border-color: #e91e63;
+/* BOTONES PRINCIPALES */
+.btn-main {
+  height: 90px;
+  --background: white;
   --color: #e91e63;
+  --border-radius: 15px;
+  font-size: 14px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* ICONOS GRANDES */
+.btn-main ion-icon {
+  font-size: 26px;
+}
+
+/* BOTÓN SECUNDARIO */
+.btn-secondary {
+  margin-top: 10px;
+  height: 50px;
+  --background: #e91e63;
+  --color: white;
   --border-radius: 12px;
-  height: 45px;
 }

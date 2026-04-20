@@ -4,13 +4,12 @@ import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { MenuController } from '@ionic/angular';
 
-
 @Component({
   selector: 'app-menu',
   standalone: true,
   templateUrl: './menu.page.html',
   styleUrls: ['./menu.page.scss'],
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule], // 👈 esto está bien
 })
 export class MenuPage {
 

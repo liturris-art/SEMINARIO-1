@@ -12,9 +12,6 @@ import {
 } from '@ionic/angular/standalone';
 
 import { provideHttpClient } from '@angular/common/http';
-
-import { addIcons } from 'ionicons';
-
 import {
   carOutline,
   fingerPrintOutline,
@@ -28,10 +25,15 @@ import {
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
+import { addIcons } from 'ionicons';
+import { alertCircleOutline } from 'ionicons/icons';
+
+  
 
 // Registrar TODOS los iconos usados en la app
 addIcons({
   'car-outline': carOutline,
+  'alert-circle-outline': alertCircleOutline,
   'finger-print-outline': fingerPrintOutline,
   'refresh-outline': refreshOutline,
   'log-in-outline': logInOutline,
