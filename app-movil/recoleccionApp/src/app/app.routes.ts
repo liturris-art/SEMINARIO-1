@@ -66,12 +66,6 @@ export const routes: Routes = [
     redirectTo: 'login',
   },
 
-  {
-  path: 'perfil',
-  loadComponent: () =>
-    import('./pages/perfil/perfil.page').then(m => m.PerfilPage)
-},
-
 {
   path: 'historial',
   loadComponent: () =>
@@ -82,7 +76,8 @@ export const routes: Routes = [
   path: 'reportes',
   loadComponent: () =>
     import('./pages/reportes/reportes.page').then(m => m.ReportesPage)
- },  {
+ },
+  {
     path: 'perfil',
     loadComponent: () => import('./pages/perfil/perfil.page').then( m => m.PerfilPage)
   },

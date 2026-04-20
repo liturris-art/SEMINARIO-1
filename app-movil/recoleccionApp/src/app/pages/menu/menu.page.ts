@@ -2,49 +2,49 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
+import { MenuController } from '@ionic/angular';
+
 
 @Component({
   selector: 'app-menu',
   standalone: true,
   templateUrl: './menu.page.html',
   styleUrls: ['./menu.page.scss'],
-  imports: [
-    IonicModule,
-    CommonModule
-  ]
+  imports: [IonicModule, CommonModule],
 })
 export class MenuPage {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private menuCtrl: MenuController
   ) {}
 
-  verPerfil(){
+  async cerrarMenu() {
+    await this.menuCtrl.close();
+  }
+
+  async verPerfil() {
+    await this.cerrarMenu();
     this.router.navigate(['/perfil']);
   }
 
-  historial(){
-    this.router.navigate(['/historial']);
-  }
-
-  reportes(){
-    this.router.navigate(['/reportes']);
-  }
-
-  sincronizar(){
-    console.log(" Sincronizando datos...");
-    // luego aquí puedes llamar tu servicio real
-  }
-
-  configuracion(){
-    this.router.navigate(['/configuracion']);
-  }
-
-
-  verMapa(){
+  async verMapa() {
+    await this.cerrarMenu();
     this.router.navigate(['/home']);
   }
 
+  async historial() {
+    await this.cerrarMenu();
+    this.router.navigate(['/historial']);
+  }
+
+  async reportes() {
+    await this.cerrarMenu();
+    this.router.navigate(['/reportes']);
+  }
+
+  async configuracion() {
+    await this.cerrarMenu();
+    this.router.navigate(['/configuracion']);
+  }
 }

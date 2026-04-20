@@ -1,110 +1,86 @@
-/* CONTENEDOR PRINCIPAL */
-
-.main-container {
-  width: 100%;
-  height: 100%;
+/* PANEL MENU */
+.menu-panel {
+  --width: 260px;
+  z-index: 1000; /* 🔥 asegura que esté encima */
 }
 
-/* FONDO GENERAL */
-
-ion-content {
-  --background: #f5f6fa;
-}
-
-/* TOOLBAR SUPERIOR */
-
-ion-toolbar {
-  --background: #e91e63;
-  --color: white;
-}
-
-/* PERFIL DEL MENU */
-
+/* PERFIL */
 .profile-section {
   text-align: center;
   padding: 25px 15px;
+  background: #f8f9fb;
 }
 
 .profile-avatar {
-  margin: auto;
-  width: 70px;
-  height: 70px;
+  margin: 0 auto 10px auto; /* 🔥 centrado */
+  width: 80px;
+  height: 80px;
 }
 
 .profile-section h2 {
-  margin-top: 10px;
+  margin: 10px 0 5px;
+  font-size: 18px;
   font-weight: bold;
-  color: #333;
 }
 
 .profile-section p {
+  color: #777;
   font-size: 13px;
-  color: #777;
 }
 
-/* LISTA DEL MENU */
-
+/* LISTA MENU */
 .menu-list ion-item {
-  --border-radius: 12px;
-  margin: 6px 10px;
-  transition: all 0.2s ease;
-
-  /* quitar azul al presionar */
-  --background-activated: transparent;
-  --background-focused: transparent;
-  --ripple-color: transparent;
+  --padding-start: 16px;
+  font-size: 15px;
 }
 
-.menu-list ion-item:hover {
-  background: #ffe5ee;
+/* CONTENIDO PRINCIPAL */
+.main-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ICONOS DEL MENU */
-
-ion-list ion-icon {
-  color: #e91e63;
+/* DASHBOARD */
+.dashboard-content {
+  padding: 15px;
 }
 
-/* TARJETA PRINCIPAL */
-
+/* TARJETA BIENVENIDA */
 .welcome-card {
-  border-radius: 18px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  background: white;
+  border-radius: 16px;
+  padding: 10px;
+  margin-top: 10px;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-ion-card-title {
-  font-weight: bold;
-  color: #333;
+.welcome-card ion-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
 }
 
-ion-card-subtitle {
-  color: #777;
+.welcome-card ion-card-subtitle {
+  font-size: 14px;
+  color: #666;
 }
 
-/* BOTONES */
+.welcome-card ion-card-content {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-top: 5px;
+}
 
+/* ACCIONES */
 .quick-actions {
   margin-top: 20px;
-}
-
-.action-btn {
-  --background: #e91e63;
-  --background-hover: #d81b60;
-  --border-radius: 12px;
-  height: 48px;
-  font-weight: bold;
 }
 
 .action-outline {
   --border-color: #e91e63;
   --color: #e91e63;
   --border-radius: 12px;
-  height: 48px;
-}
-
-/* MENU LATERAL */
-
-ion-menu {
-  --width: 260px;
+  height: 45px;
 }
