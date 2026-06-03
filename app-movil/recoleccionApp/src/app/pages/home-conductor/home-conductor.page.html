@@ -1,0 +1,210 @@
+<ion-header class="home-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <div class="header-user">
+      <div class="header-avatar">{{ inicialUsuario }}</div>
+      <div class="header-info">
+        <span class="header-nombre">{{ nombreUsuario }}</span>
+        <span class="header-rol">Conductor</span>
+      </div>
+    </div>
+
+    <ion-buttons slot="end">
+      <div class="estado-chip" [class.chip-activo]="tracking">
+        <span class="chip-dot"></span>
+        {{ tracking ? 'En ruta' : 'Listo' }}
+      </div>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="home-content" [scrollY]="false">
+
+  <!-- Mapa completo de fondo -->
+  <div class="mapa-fullscreen">
+    <app-map-view
+      #mapView
+      [rutas]="rutas"
+      [calles]="calles"
+      userRole="conductor">
+    </app-map-view>
+  </div>
+
+  <!-- HUD GPS en vivo -->
+  <div class="gps-hud" *ngIf="tracking">
+    <div class="gps-item">
+      <ion-icon name="navigate-outline"></ion-icon>
+      <div>
+        <span class="gps-val">{{ velocidad }}</span>
+        <span class="gps-lbl">km/h</span>
+      </div>
+    </div>
+    <div class="gps-sep"></div>
+    <div class="gps-item">
+      <ion-icon name="footsteps-outline"></ion-icon>
+      <div>
+        <span class="gps-val">{{ distStr }}</span>
+        <span class="gps-lbl">km</span>
+      </div>
+    </div>
+    <div class="gps-sep"></div>
+    <div class="gps-item">
+      <ion-icon name="location-outline"></ion-icon>
+      <div>
+        <span class="gps-coords">{{ latStr }}</span>
+        <span class="gps-coords">{{ lngStr }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel inferior deslizable -->
+  <div class="panel" [class.panel-cerrado]="!panelAbierto">
+
+    <div class="panel-handle" (click)="togglePanel()">
+      <div class="handle-bar"></div>
+      <ion-icon [name]="panelAbierto ? 'chevron-down-outline' : 'chevron-up-outline'" class="handle-icon"></ion-icon>
+    </div>
+
+    <div class="panel-body">
+
+      <!-- ══ PASOS (antes de iniciar) ══ -->
+      <ng-container *ngIf="!tracking">
+
+        <div class="pasos-header">
+          <span class="pasos-titulo">Preparar recorrido</span>
+          <span class="pasos-contador">{{ pasoActual }}/4</span>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="(pasoActual - 1) * 33.3"></div>
+        </div>
+
+        <!-- Paso 1: Vehículo -->
+        <div class="paso-card" [class.paso-done]="pasoCompletado(1)" [class.paso-active]="pasoActual === 1">
+          <div class="paso-num" [class.done]="pasoCompletado(1)">
+            <ion-icon *ngIf="pasoCompletado(1)" name="checkmark-outline"></ion-icon>
+            <span *ngIf="!pasoCompletado(1)">1</span>
+          </div>
+          <div class="paso-content">
+            <span class="paso-label">Vehículo</span>
+            <ion-select *ngIf="pasoActual === 1" placeholder="Seleccionar vehículo"
+              [(ngModel)]="vehiculoSeleccionado" (ionChange)="onVehiculoChange()" class="paso-select">
+              <ion-select-option *ngFor="let v of vehiculos" [value]="v">
+                {{ v.placa }} · {{ v.marca }} {{ v.modelo }}
+              </ion-select-option>
+            </ion-select>
+            <span class="paso-resumen" *ngIf="vehiculoSeleccionado">
+              {{ vehiculoSeleccionado.placa }} · {{ vehiculoSeleccionado.marca }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Paso 2: Ruta -->
+        <div class="paso-card" [class.paso-done]="pasoCompletado(2)" [class.paso-active]="pasoActual === 2">
+          <div class="paso-num" [class.done]="pasoCompletado(2)">
+            <ion-icon *ngIf="pasoCompletado(2)" name="checkmark-outline"></ion-icon>
+            <span *ngIf="!pasoCompletado(2)">2</span>
+          </div>
+          <div class="paso-content">
+            <span class="paso-label">Ruta asignada</span>
+            <ion-select *ngIf="pasoActual === 2" placeholder="Seleccionar ruta"
+              [(ngModel)]="rutaSeleccionada" (ionChange)="onRutaChange()" class="paso-select">
+              <ion-select-option *ngFor="let r of rutas" [value]="r">
+                {{ r.nombre_ruta }}
+              </ion-select-option>
+            </ion-select>
+            <!-- Botón guardar ruta en mapa + historial -->
+            <div class="paso-guardar-ruta" *ngIf="rutaSeleccionada">
+              <ion-button size="small"
+                [color]="rutaGuardada ? 'success' : 'primary'"
+                fill="outline"
+                (click)="guardarRutaSeleccionada()"
+                [disabled]="guardandoRuta">
+                <ion-icon [name]="rutaGuardada ? 'checkmark-circle-outline' : 'save-outline'" slot="start"></ion-icon>
+                {{ rutaGuardada ? 'Ruta guardada ✓' : 'Guardar ruta' }}
+              </ion-button>
+            </div>
+            <span class="paso-resumen" *ngIf="rutaSeleccionada">
+              {{ rutaSeleccionada.nombre_ruta }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Paso 3: Identidad -->
+        <div class="paso-card" [class.paso-done]="pasoCompletado(3)" [class.paso-active]="pasoActual === 3">
+          <div class="paso-num" [class.done]="pasoCompletado(3)">
+            <ion-icon *ngIf="pasoCompletado(3)" name="checkmark-outline"></ion-icon>
+            <span *ngIf="!pasoCompletado(3)">3</span>
+          </div>
+          <div class="paso-content">
+            <span class="paso-label">Verificar identidad</span>
+            <ion-button *ngIf="pasoActual === 3" size="small" color="medium"
+              fill="outline" (click)="validarIdentidad()" class="paso-btn">
+              <ion-icon name="camera-outline" slot="start"></ion-icon>
+              Abrir cámara
+            </ion-button>
+            <span class="paso-resumen ok" *ngIf="identidadValidada">
+              <ion-icon name="shield-checkmark-outline"></ion-icon> Verificado
+            </span>
+          </div>
+        </div>
+
+        <!-- Paso 4: Iniciar -->
+        <div class="paso-card paso-iniciar" [class.paso-active]="pasoActual === 4">
+          <ion-button expand="block" color="success" class="btn-iniciar"
+            [disabled]="!pasoCompletado(1) || !pasoCompletado(2) || !pasoCompletado(3)"
+            (click)="iniciarRecorrido()">
+            <ion-icon name="play-circle-outline" slot="start"></ion-icon>
+            Iniciar recorrido
+          </ion-button>
+        </div>
+
+      </ng-container>
+
+      <!-- ══ TARJETA VEHÍCULO ACTIVO (durante tracking) ══ -->
+      <div class="vehiculo-activo" *ngIf="tracking">
+
+        <div class="va-header">
+          <div class="va-icon"><ion-icon name="car-outline"></ion-icon></div>
+          <div class="va-info">
+            <span class="va-placa">{{ vehiculoSeleccionado?.placa }}</span>
+            <span class="va-modelo">{{ vehiculoSeleccionado?.marca }} {{ vehiculoSeleccionado?.modelo }}</span>
+          </div>
+          <div class="va-badge">
+            <span class="pulse-dot"></span>
+            En ruta
+          </div>
+        </div>
+
+        <div class="va-stats">
+          <div class="va-stat">
+            <ion-icon name="speedometer-outline"></ion-icon>
+            <span>{{ velocidad }} km/h</span>
+          </div>
+          <div class="va-stat">
+            <ion-icon name="footsteps-outline"></ion-icon>
+            <span>{{ distStr }} km</span>
+          </div>
+          <div class="va-stat">
+            <ion-icon name="map-outline"></ion-icon>
+            <span>{{ rutaSeleccionada?.nombre_ruta || '—' }}</span>
+          </div>
+        </div>
+
+        <ion-button expand="block" color="danger" fill="outline"
+          class="btn-detener" (click)="detenerRecorrido()">
+          <ion-icon name="stop-circle-outline" slot="start"></ion-icon>
+          Finalizar y guardar recorrido
+        </ion-button>
+
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

@@ -1,0 +1,25 @@
+<!-- ============================================================
+     INSTRUCCIONES — Info.plist (iOS)
+     Ubicación en tu proyecto:
+       ios/App/App/Info.plist
+
+     Busca si ya existe una sección <key>CFBundleURLTypes</key>.
+     Si existe, agrega el <dict> de abajo dentro del <array> existente.
+     Si NO existe, agrega el bloque completo antes del </dict> final del archivo.
+============================================================ -->
+
+<!-- PEGA ESTO en ios/App/App/Info.plist -->
+
+<key>CFBundleURLTypes</key>
+<array>
+    <dict>
+        <key>CFBundleURLName</key>
+        <string>com.cleanroute.app</string>
+
+        <key>CFBundleURLSchemes</key>
+        <array>
+            <!-- ✅ Esquema que iOS usará para abrir la app desde el correo de Supabase -->
+            <string>recoleccionapp</string>
+        </array>
+    </dict>
+</array>

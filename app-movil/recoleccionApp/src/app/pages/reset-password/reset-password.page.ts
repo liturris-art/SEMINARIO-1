@@ -1,107 +1,87 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-
 import {
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonInput,
-  IonButton,
-  IonItem,
-  IonIcon,
-  AlertController,
-  LoadingController
+  IonContent, IonHeader, IonToolbar, IonTitle,
+  IonInput, IonButton, IonItem, IonIcon, IonSpinner,
+  ToastController, LoadingController,
 } from '@ionic/angular/standalone';
-
 import { AuthService } from '../../services/auth.service';
+import { SupabaseService } from '../../services/supabase.service';
 
 @Component({
   selector: 'app-reset-password',
   templateUrl: './reset-password.page.html',
   standalone: true,
   imports: [
-    IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonInput,
-    IonButton,
-    IonItem,
-    IonIcon,
-    FormsModule,
-    CommonModule
-  ]
+    IonContent, IonHeader, IonToolbar, IonTitle,
+    IonInput, IonButton, IonItem, IonIcon, IonSpinner,
+    FormsModule, CommonModule,
+  ],
 })
-export class ResetPasswordPage {
+export class ResetPasswordPage implements OnInit {
 
-  password: string = '';
-  confirmPassword: string = '';
+  password        = '';
+  confirmPassword = '';
+  showPassword    = false;
+  sesionActiva    = false;
+  verificando     = true;
 
   constructor(
     private auth: AuthService,
+    private supabaseService: SupabaseService,
     private router: Router,
-    private alertCtrl: AlertController,
-    private loadingCtrl: LoadingController
+    private toastCtrl: ToastController,
+    private loadingCtrl: LoadingController,
   ) {}
 
-  async showAlert(message: string) {
-    const alert = await this.alertCtrl.create({
-      header: 'Información',
-      message,
-      buttons: ['OK']
-    });
-
-    await alert.present();
+  async ngOnInit() {
+    await this.verificarSesion();
   }
 
+  private async verificarSesion() {
+    this.verificando = true;
+    try {
+      const { data } = await this.supabaseService.getClient().auth.getSession();
+      this.sesionActiva = !!data.session;
+      if (!this.sesionActiva) {
+        await this.showToast('El enlace expiró o ya fue usado. Solicita uno nuevo.', 'warning');
+        this.router.navigate(['/forgot-password'], { replaceUrl: true });
+      }
+    } catch {
+      this.router.navigate(['/login'], { replaceUrl: true });
+    } finally {
+      this.verificando = false;
+    }
+  }
+
+  togglePassword() { this.showPassword = !this.showPassword; }
+
   async updatePassword() {
+    if (!this.password || !this.confirmPassword)
+      return this.showToast('Completa ambos campos', 'warning');
+    if (this.password.length < 6)
+      return this.showToast('La contraseña debe tener al menos 6 caracteres', 'warning');
+    if (this.password !== this.confirmPassword)
+      return this.showToast('Las contraseñas no coinciden', 'danger');
 
-    if (!this.password || !this.confirmPassword) {
-      this.showAlert("Debe completar los campos");
-      return;
-    }
-
-    if (this.password !== this.confirmPassword) {
-      this.showAlert("Las contraseñas no coinciden");
-      return;
-    }
-
-    const loading = await this.loadingCtrl.create({
-      message: 'Actualizando contraseña...'
-    });
-
+    const loading = await this.loadingCtrl.create({ message: 'Actualizando contraseña...' });
     await loading.present();
 
     try {
-
-      // ✅ CORREGIDO: SIN { error }
       await this.auth.updatePassword(this.password);
-
       await loading.dismiss();
-
-      const alert = await this.alertCtrl.create({
-        header: 'Éxito',
-        message: 'Contraseña actualizada correctamente',
-        buttons: [{
-          text: 'Ir al login',
-          handler: () => {
-            this.router.navigate(['/login']);
-          }
-        }]
-      });
-
-      await alert.present();
-
+      await this.showToast('✅ Contraseña actualizada correctamente', 'success');
+      setTimeout(() => this.router.navigate(['/login'], { replaceUrl: true }), 1500);
     } catch (error: any) {
-
       await loading.dismiss();
-      this.showAlert(error.message || "Error al actualizar");
-
+      this.showToast(error.message || 'Error al actualizar la contraseña', 'danger');
     }
-
   }
 
+  private async showToast(message: string, color: 'success' | 'warning' | 'danger') {
+    const toast = await this.toastCtrl.create({ message, color, duration: 3500, position: 'top' });
+    await toast.present();
+  }
 }

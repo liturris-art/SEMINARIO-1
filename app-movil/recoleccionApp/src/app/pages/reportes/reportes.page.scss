@@ -1,0 +1,100 @@
+.rep-content { --background: #f2f4f8; }
+
+.estado-center {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 60%; gap: 12px;
+  p { color: #888; font-size: 14px; }
+}
+.estado-icon { font-size: 52px; color: #ddd; }
+
+// ── KPIs ────────────────────────────────────────────────
+.kpi-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; padding: 16px 16px 4px;
+}
+
+.kpi {
+  background: white; border-radius: 16px;
+  padding: 16px; text-align: center;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.06);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+
+  ion-icon { font-size: 26px; margin-bottom: 4px; }
+}
+
+.kpi-num   { font-size: 26px; font-weight: 700; color: #1a1a2e; line-height: 1; }
+.kpi-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.kpi-total ion-icon { color: #1D9E75; }
+.kpi-ok    ion-icon { color: #4caf50; }
+.kpi-live  ion-icon { color: #F5A623; }
+.kpi-time  ion-icon { color: #e91e63; }
+
+// ── Secciones ─────────────────────────────────────────
+.card-seccion {
+  margin: 12px 16px;
+  background: white; border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.06);
+  padding: 16px;
+}
+
+.sec-titulo {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 600; color: #333;
+  margin: 0 0 16px;
+  ion-icon { color: #e91e63; font-size: 18px; }
+}
+
+// ── Gráfica de barras ─────────────────────────────────
+.chart-barras {
+  display: flex; align-items: flex-end; justify-content: space-around;
+  height: 90px; gap: 6px;
+}
+
+.barra-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px; flex: 1;
+}
+
+.barra-outer {
+  flex: 1; width: 100%; display: flex;
+  align-items: flex-end; justify-content: center;
+}
+
+.barra-inner {
+  width: 100%; max-width: 28px;
+  background: linear-gradient(180deg, #e91e63, #c2185b);
+  border-radius: 6px 6px 0 0;
+  min-height: 4px;
+  position: relative; transition: height 0.4s ease;
+  display: flex; align-items: flex-start; justify-content: center;
+}
+
+.barra-count {
+  position: absolute; top: -18px;
+  font-size: 10px; font-weight: 700; color: #e91e63;
+}
+
+.barra-dia { font-size: 10px; color: #aaa; }
+
+// ── Resumen lista ─────────────────────────────────────
+.resumen-lista { display: flex; flex-direction: column; gap: 0; }
+
+.res-fila {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  &:last-child { border-bottom: none; }
+
+  span {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #555;
+    ion-icon { color: #bbb; font-size: 16px; }
+  }
+  strong { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+}
+
+.sin-datos {
+  text-align: center; padding: 32px 16px;
+  ion-icon { font-size: 52px; color: #ddd; display: block; margin-bottom: 12px; }
+  p { color: #aaa; font-size: 14px; line-height: 1.6; }
+}

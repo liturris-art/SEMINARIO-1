@@ -1,14 +1,73 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>historial</ion-title>
+<ion-header>
+  <ion-toolbar style="--background:#e91e63;--color:white">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Historial</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargar()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">historial</ion-title>
-    </ion-toolbar>
-  </ion-header>
-</ion-content>
+<ion-content class="hist-content">
 
+  <!-- Cargando -->
+  <div *ngIf="cargando" class="estado-center">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando recorridos...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!cargando && error" class="estado-center">
+    <ion-icon name="cloud-offline-outline" class="estado-icon"></ion-icon>
+    <p>No se pudo cargar el historial</p>
+    <ion-button size="small" fill="outline" color="primary" (click)="cargar()">
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- Sin datos -->
+  <div *ngIf="!cargando && !error && recorridos.length === 0" class="estado-center">
+    <ion-icon name="map-outline" class="estado-icon"></ion-icon>
+    <p>Aún no hay recorridos registrados</p>
+  </div>
+
+  <!-- Lista -->
+  <div *ngIf="!cargando && !error && recorridos.length > 0" class="lista">
+
+    <div class="resumen-banner">
+      <div class="res-stat">
+        <span class="res-num">{{ recorridos.length }}</span>
+        <span class="res-label">recorridos</span>
+      </div>
+      <div class="res-divider"></div>
+      <div class="res-stat">
+        <span class="res-num">{{ recorridos[0] ? fecha(recorridos[0].inicio).split(',')[0] : '—' }}</span>
+        <span class="res-label">último</span>
+      </div>
+    </div>
+
+    <div class="card-recorrido" *ngFor="let r of recorridos; let i = index">
+      <div class="rec-num">#{{ recorridos.length - i }}</div>
+      <div class="rec-body">
+        <div class="rec-header">
+          <span class="rec-fecha">{{ fecha(r.inicio) }}</span>
+          <span class="rec-badge" [class.badge-activo]="!r.fin">
+            {{ r.fin ? 'Completado' : 'En curso' }}
+          </span>
+        </div>
+        <div class="rec-stats">
+          <span><ion-icon name="timer-outline"></ion-icon> {{ duracion(r) }}</span>
+          <span><ion-icon name="car-outline"></ion-icon> {{ r.vehiculo_id || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>

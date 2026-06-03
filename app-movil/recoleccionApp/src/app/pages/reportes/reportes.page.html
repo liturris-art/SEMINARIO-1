@@ -1,13 +1,111 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>reportes</ion-title>
+<ion-header>
+  <ion-toolbar style="--background:#e91e63;--color:white">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Reportes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cargar()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">reportes</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="rep-content">
+
+  <div *ngIf="cargando" class="estado-center">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Calculando estadísticas...</p>
+  </div>
+
+  <div *ngIf="!cargando && error" class="estado-center">
+    <ion-icon name="cloud-offline-outline" class="estado-icon"></ion-icon>
+    <p>No se pudieron cargar los datos</p>
+    <ion-button size="small" fill="outline" (click)="cargar()">Reintentar</ion-button>
+  </div>
+
+  <div *ngIf="!cargando && !error">
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+
+      <div class="kpi kpi-total">
+        <ion-icon name="car-outline"></ion-icon>
+        <span class="kpi-num">{{ stats.total }}</span>
+        <span class="kpi-label">Total recorridos</span>
+      </div>
+
+      <div class="kpi kpi-ok">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <span class="kpi-num">{{ stats.completados }}</span>
+        <span class="kpi-label">Completados</span>
+      </div>
+
+      <div class="kpi kpi-live">
+        <ion-icon name="radio-outline"></ion-icon>
+        <span class="kpi-num">{{ stats.enCurso }}</span>
+        <span class="kpi-label">En curso</span>
+      </div>
+
+      <div class="kpi kpi-time">
+        <ion-icon name="timer-outline"></ion-icon>
+        <span class="kpi-num">{{ duracionStr(stats.tiempoPromedioMin) }}</span>
+        <span class="kpi-label">Promedio</span>
+      </div>
+
+    </div>
+
+    <!-- Actividad semanal -->
+    <div class="card-seccion">
+      <h3 class="sec-titulo">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        Actividad semanal
+      </h3>
+
+      <div class="chart-barras">
+        <div class="barra-wrap" *ngFor="let b of barras">
+          <div class="barra-outer">
+            <div class="barra-inner" [style.height.%]="b.pct || 4">
+              <span class="barra-count" *ngIf="b.count > 0">{{ b.count }}</span>
+            </div>
+          </div>
+          <span class="barra-dia">{{ b.dia }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen adicional -->
+    <div class="card-seccion">
+      <h3 class="sec-titulo">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+        Resumen
+      </h3>
+
+      <div class="resumen-lista">
+        <div class="res-fila">
+          <span><ion-icon name="calendar-outline"></ion-icon> Días activos</span>
+          <strong>{{ stats.diasActivos }}</strong>
+        </div>
+        <div class="res-fila">
+          <span><ion-icon name="checkmark-done-outline"></ion-icon> Tasa de completados</span>
+          <strong>{{ stats.total ? ((stats.completados / stats.total) * 100).toFixed(0) : 0 }}%</strong>
+        </div>
+        <div class="res-fila">
+          <span><ion-icon name="time-outline"></ion-icon> Tiempo promedio</span>
+          <strong>{{ duracionStr(stats.tiempoPromedioMin) }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin datos -->
+    <div *ngIf="stats.total === 0" class="sin-datos">
+      <ion-icon name="analytics-outline"></ion-icon>
+      <p>Aún no hay datos para mostrar.<br>Realiza tu primer recorrido.</p>
+    </div>
+
+  </div>
+
 </ion-content>

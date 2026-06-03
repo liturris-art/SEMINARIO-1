@@ -1,0 +1,22 @@
+<!-- ============================================================
+     INSTRUCCIONES — AndroidManifest.xml
+     Ubicación en tu proyecto:
+       android/app/src/main/AndroidManifest.xml
+
+     Busca la etiqueta <activity android:name=".MainActivity">
+     y agrega el <intent-filter> de abajo DENTRO de esa activity.
+     Si ya tienes un intent-filter existente, agrega este DEBAJO del que ya existe.
+     No borres el que ya tiene (el del launcher).
+============================================================ -->
+
+<!-- PEGA ESTO dentro de <activity android:name=".MainActivity"> -->
+
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+
+    <!-- ✅ Esquema personalizado para deep links desde el correo de Supabase -->
+    <data android:scheme="recoleccionapp" />
+</intent-filter>

@@ -1,0 +1,53 @@
+.perfil-content { --background: #f2f4f8; }
+
+.loading-center {
+  display: flex; justify-content: center;
+  align-items: center; height: 50%;
+}
+
+.hero-perfil {
+  background: linear-gradient(135deg, #e91e63, #c2185b);
+  padding: 40px 20px 32px;
+  text-align: center;
+
+  h2 { color: white; font-size: 22px; font-weight: 700; margin: 12px 0 8px; }
+}
+
+.avatar-grande {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  border: 3px solid rgba(255,255,255,0.6);
+  color: white; font-size: 32px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto;
+}
+
+.rol-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.2); color: white;
+  font-size: 12px; padding: 4px 12px; border-radius: 20px;
+  ion-icon { font-size: 13px; }
+}
+
+.seccion {
+  margin: 16px; background: white;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  padding: 8px 0;
+}
+
+.info-row {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  &:last-child { border-bottom: none; }
+
+  ion-icon { font-size: 20px; color: #e91e63; margin-top: 2px; flex-shrink: 0; }
+}
+
+.info-label { margin: 0 0 2px; font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+.info-valor  { margin: 0; font-size: 15px; color: #222; font-weight: 500; }
+.id-val      { font-size: 11px; color: #aaa; word-break: break-all; }
+
+.input-item { --border-radius: 12px; margin: 8px 12px; }
+.save-btn   { margin: 12px; --border-radius: 12px; text-transform: none; letter-spacing: 0; }

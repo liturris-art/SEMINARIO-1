@@ -1,0 +1,59 @@
+.hist-content { --background: #f2f4f8; }
+
+.estado-center {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 60%; gap: 12px;
+  p { color: #888; font-size: 14px; }
+}
+
+.estado-icon { font-size: 52px; color: #ddd; }
+
+.lista { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.resumen-banner {
+  background: linear-gradient(135deg, #e91e63, #c2185b);
+  border-radius: 16px; padding: 16px 20px;
+  display: flex; align-items: center; justify-content: center; gap: 24px;
+  margin-bottom: 4px;
+}
+
+.res-stat { text-align: center; }
+.res-num   { display: block; font-size: 24px; font-weight: 700; color: white; }
+.res-label { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.5px; }
+.res-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.25); }
+
+.card-recorrido {
+  background: white; border-radius: 14px;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.06);
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+
+.rec-num {
+  font-size: 12px; font-weight: 700; color: #ccc;
+  min-width: 28px; padding-top: 2px;
+}
+
+.rec-body { flex: 1; }
+
+.rec-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.rec-fecha { font-size: 13px; color: #444; font-weight: 500; }
+
+.rec-badge {
+  font-size: 11px; padding: 2px 10px; border-radius: 20px;
+  background: #e8f5e9; color: #388e3c; font-weight: 600;
+  &.badge-activo { background: #fff3e0; color: #f57c00; }
+}
+
+.rec-stats {
+  display: flex; gap: 16px;
+  span {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: #888;
+    ion-icon { font-size: 14px; color: #bbb; }
+  }
+}

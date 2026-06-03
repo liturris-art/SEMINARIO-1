@@ -1,41 +1,198 @@
-.dashboard-content {
-  --background: #f5f6fa;
-  padding: 15px;
+/* ══════════════════════════════════════════════════════════
+   MENÚ PRINCIPAL — Diseño moderno
+══════════════════════════════════════════════════════════ */
+
+.menu-content {
+  --background: #f2f4f8;
 }
 
-/* TARJETA */
-.welcome-card {
-  border-radius: 18px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
+// ── HERO ────────────────────────────────────────────────
+.hero {
+  position: relative;
+  padding: 56px 24px 36px;
+  background: linear-gradient(135deg, #e91e63 0%, #c2185b 60%, #880e4f 100%);
+  overflow: hidden;
 }
 
-/* BOTONES PRINCIPALES */
-.btn-main {
-  height: 90px;
-  --background: white;
-  --color: #e91e63;
-  --border-radius: 15px;
-  font-size: 14px;
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.12) 0%, transparent 55%),
+    radial-gradient(circle at 10% 90%, rgba(255,255,255,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
 
+.hero-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  border: 2px solid rgba(255,255,255,0.5);
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+
+.hero-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.saludo {
+  color: rgba(255,255,255,0.75);
+  font-size: 13px;
+  margin: 0 0 2px;
+}
+
+.nombre {
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rol-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+
+  ion-icon { font-size: 13px; }
+}
+
+.settings-btn {
+  --color: rgba(255,255,255,0.8);
+  --padding-start: 8px;
+  --padding-end: 0;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+// ── GRID ─────────────────────────────────────────────────
+.grid-wrapper {
+  padding: 20px 16px 8px;
   display: flex;
   flex-direction: column;
+  gap: 14px;
+}
+
+// Base de todas las tarjetas
+.card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  overflow: hidden;
+  position: relative;
+
+  &:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+}
+
+// Icono en círculo de color
+.card-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
+  flex-shrink: 0;
 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  ion-icon { font-size: 24px; color: white; }
 }
 
-/* ICONOS GRANDES */
-.btn-main ion-icon {
-  font-size: 26px;
+.card-info {
+  flex: 1;
+  min-width: 0;
+  h3 { margin: 0 0 2px; font-size: 15px; font-weight: 600; color: #1a1a2e; }
+  p  { margin: 0; font-size: 12px; color: #888; }
 }
 
-/* BOTÓN SECUNDARIO */
-.btn-secondary {
-  margin-top: 10px;
-  height: 50px;
-  --background: #e91e63;
-  --color: white;
-  --border-radius: 12px;
+.card-arrow {
+  font-size: 18px;
+  color: #ccc;
+  flex-shrink: 0;
 }
+
+// ── Tarjeta grande (Mapa) ─────────────────────────────
+.card-large {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(29,158,117,0.07);
+  }
+}
+
+.card-mapa .card-icon-wrap {
+  background: linear-gradient(135deg, #1D9E75, #0F6E56);
+  width: 56px;
+  height: 56px;
+}
+
+// ── Fila de dos tarjetas ──────────────────────────────
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.card-sm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px;
+  gap: 12px;
+
+  h3 { margin: 0 0 2px; font-size: 14px; font-weight: 600; color: #1a1a2e; }
+  p  { margin: 0; font-size: 11px; color: #999; }
+}
+
+.card-perfil .card-icon-wrap   { background: linear-gradient(135deg, #e91e63, #c2185b); }
+.card-historial .card-icon-wrap { background: linear-gradient(135deg, #F5A623, #e08000); }
+
+// ── Tarjeta mediana (Reportes) ────────────────────────
+.card-medium {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.card-reportes .card-icon-wrap { background: linear-gradient(135deg, #378ADD, #1a5fa8); }
+
+

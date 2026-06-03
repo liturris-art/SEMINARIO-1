@@ -1,38 +1,223 @@
 <ion-header>
-  <ion-toolbar style="--background:#e91e63; --color:white;">
+  <ion-toolbar class="cfg-toolbar">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
     <ion-title>Configuración</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="settings-content ion-padding">
+<ion-content class="cfg-content">
 
-  <ion-card class="settings-card">
+  <!-- ══ PERFIL ═══════════════════════════════════════════ -->
+  <div class="perfil-banner" (click)="irPerfil()">
+    <div class="perfil-avatar">{{ usuario.inicial }}</div>
+    <div class="perfil-info">
+      <span class="perfil-nombre">{{ usuario.nombre }}</span>
+      <span class="perfil-email">{{ usuario.email }}</span>
+      <span class="perfil-rol">{{ usuario.rol }}</span>
+    </div>
+    <ion-icon name="chevron-forward-outline" class="perfil-arrow"></ion-icon>
+  </div>
 
-    <ion-card-header>
-      <ion-card-title>Seguridad</ion-card-title>
-    </ion-card-header>
+  <!-- ══ SECCIÓN: SEGURIDAD ════════════════════════════════ -->
+  <div class="cfg-group">
+    <p class="group-label">Seguridad</p>
 
-    <ion-card-content>
+    <div class="cfg-card">
 
-      <ion-list>
+      <div class="cfg-row" *ngIf="biometricDisponible">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap green">
+            <ion-icon name="finger-print-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Huella / Rostro</span>
+            <span class="cfg-row-sub">Acceso biométrico al iniciar</span>
+          </div>
+        </div>
+        <ion-toggle
+          [checked]="prefs.biometria"
+          (ionChange)="onToggleBiometria($event)"
+          color="success">
+        </ion-toggle>
+      </div>
 
-        <ion-item>
-          <ion-label>Activar biometría</ion-label>
-          <ion-toggle (ionChange)="toggleBiometric($event)"></ion-toggle>
-        </ion-item>
+      <div class="cfg-separator" *ngIf="biometricDisponible"></div>
 
-        <ion-item button (click)="goResetPassword()">
-          <ion-label>Cambiar contraseña</ion-label>
-        </ion-item>
+      <div class="cfg-row tappable" (click)="irCambiarPassword()">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap pink">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Cambiar contraseña</span>
+            <span class="cfg-row-sub">Enviar enlace al correo</span>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+      </div>
 
-      </ion-list>
+    </div>
+  </div>
 
-    </ion-card-content>
+  <!-- ══ SECCIÓN: PREFERENCIAS ════════════════════════════ -->
+  <div class="cfg-group">
+    <p class="group-label">Preferencias</p>
 
-  </ion-card>
+    <div class="cfg-card">
 
-  <ion-button expand="block" class="logout-btn" (click)="logout()">
+      <div class="cfg-row">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap blue">
+            <ion-icon name="notifications-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Notificaciones</span>
+            <span class="cfg-row-sub">Alertas de rutas y recolección</span>
+          </div>
+        </div>
+        <ion-toggle
+          [checked]="prefs.notificaciones"
+          (ionChange)="onToggle('notificaciones', $event)"
+          color="success">
+        </ion-toggle>
+      </div>
+
+      <div class="cfg-separator"></div>
+
+      <div class="cfg-row">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap dark">
+            <ion-icon name="moon-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Modo oscuro</span>
+            <span class="cfg-row-sub">Capa oscura en el mapa</span>
+          </div>
+        </div>
+        <ion-toggle
+          [checked]="prefs.modoOscuro"
+          (ionChange)="onToggle('modoOscuro', $event)"
+          color="success">
+        </ion-toggle>
+      </div>
+
+      <div class="cfg-separator"></div>
+
+      <div class="cfg-row">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap orange">
+            <ion-icon name="locate-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">GPS de alta precisión</span>
+            <span class="cfg-row-sub">Mayor exactitud, más batería</span>
+          </div>
+        </div>
+        <ion-toggle
+          [checked]="prefs.gpsAlta"
+          (ionChange)="onToggle('gpsAlta', $event)"
+          color="success">
+        </ion-toggle>
+      </div>
+
+      <div class="cfg-separator"></div>
+
+      <div class="cfg-row">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap teal">
+            <ion-icon name="speedometer-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Unidad de distancia</span>
+            <span class="cfg-row-sub">Kilómetros o millas</span>
+          </div>
+        </div>
+        <ion-select
+          [value]="prefs.unidadDistancia"
+          (ionChange)="onSelectChange('unidadDistancia', $event)"
+          interface="popover"
+          class="cfg-select">
+          <ion-select-option value="km">km</ion-select-option>
+          <ion-select-option value="mi">mi</ion-select-option>
+        </ion-select>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN: DATOS ═══════════════════════════════════ -->
+  <div class="cfg-group">
+    <p class="group-label">Datos y privacidad</p>
+
+    <div class="cfg-card">
+
+      <div class="cfg-row tappable" (click)="confirmarBorrarDatos()">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap red">
+            <ion-icon name="trash-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Borrar datos locales</span>
+            <span class="cfg-row-sub">Elimina datos offline y rutas guardadas</span>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ SECCIÓN: SOPORTE ══════════════════════════════════ -->
+  <div class="cfg-group">
+    <p class="group-label">Soporte</p>
+
+    <div class="cfg-card">
+
+      <div class="cfg-row tappable" (click)="abrirSoporte()">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap blue">
+            <ion-icon name="mail-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Contactar soporte</span>
+            <span class="cfg-row-sub">soporte@cleanroute.app</span>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+      </div>
+
+      <div class="cfg-separator"></div>
+
+      <div class="cfg-row">
+        <div class="cfg-row-left">
+          <div class="cfg-icon-wrap gray">
+            <ion-icon name="information-circle-outline"></ion-icon>
+          </div>
+          <div class="cfg-row-info">
+            <span class="cfg-row-title">Versión de la app</span>
+            <span class="cfg-row-sub">CleanRoute v{{ version }}</span>
+          </div>
+        </div>
+        <span class="version-badge">v{{ version }}</span>
+      </div>
+
+    </div>
+  </div>
+
+ <!-- ══ BOTÓN CERRAR SESIÓN ══════════════════════════════ -->
+<div class="logout-wrap">
+  <ion-button
+    expand="block"
+    fill="outline"
+    color="danger"
+    class="logout-btn"
+    (click)="cerrarSesion()"
+  >
+    <ion-icon name="log-out-outline" slot="start"></ion-icon>
     Cerrar sesión
   </ion-button>
-
-</ion-content>
+</div>

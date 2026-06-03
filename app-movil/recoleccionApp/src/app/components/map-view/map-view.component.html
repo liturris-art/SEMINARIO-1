@@ -1,3 +1,135 @@
-<div class="map-container">
+<div class="map-wrapper" [class.fullscreen]="pantalla">
+
+  <!-- ── BARRA SUPERIOR ──────────────────────────────────── -->
+  <div class="top-bar">
+
+    <div class="search-box">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input class="search-input" type="text" placeholder="Buscar dirección..."
+        [(ngModel)]="busquedaQuery" (keyup)="onBusquedaKeyup($event)" />
+      <ion-button size="small" shape="round" color="success" (click)="buscarDireccion()">
+        <ion-spinner *ngIf="buscando" name="crescent" slot="icon-only" style="width:16px;height:16px"></ion-spinner>
+        <ion-icon *ngIf="!buscando" name="arrow-forward-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="search-results" *ngIf="busquedaResults.length">
+      <div class="search-result-item" *ngFor="let r of busquedaResults" (click)="seleccionarResultado(r)">
+        <ion-icon name="location-outline"></ion-icon>
+        {{ r.display_name | slice:0:55 }}...
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <div class="layer-group">
+        <ion-button size="small" fill="clear" [class.layer-active]="capaActual==='estandar'" (click)="cambiarCapa('estandar')" title="Mapa estándar">
+          <ion-icon name="map-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button size="small" fill="clear" [class.layer-active]="capaActual==='oscuro'" (click)="cambiarCapa('oscuro')" title="Modo noche">
+          <ion-icon name="moon-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button size="small" fill="clear" [class.layer-active]="capaActual==='satelite'" (click)="cambiarCapa('satelite')" title="Satélite">
+          <ion-icon name="earth-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+      <ion-button size="small" fill="clear" class="btn-fullscreen" (click)="togglePantalla()" [title]="pantalla ? 'Reducir' : 'Ampliar'">
+        <ion-icon [name]="pantalla ? 'contract-outline' : 'expand-outline'" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- ── MAPA ──────────────────────────────────────────────── -->
   <div id="map"></div>
+
+  <!-- ── BANNER MODO TRAZAR ────────────────────────────────── -->
+  <div class="hint-banner" *ngIf="modoTrazarRuta">
+    <ion-icon name="radio-button-on-outline"></ion-icon>
+    {{ faseTrazado === 'A' ? 'Toca el mapa: punto INICIO (A)' : 'Toca el mapa: punto DESTINO (B)' }}
+  </div>
+
+  <!-- ── BADGE RUTA A→B ────────────────────────────────────── -->
+  <div class="ruta-badge" *ngIf="distanciaRuta">
+    <ion-icon name="navigate-outline"></ion-icon>
+    <span>{{ distanciaRuta }}</span>
+    <ion-button size="small" fill="clear" color="medium" (click)="limpiarRutaAB()">
+      <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
+
+  <!-- ── HUD CONDUCTOR ─────────────────────────────────────── -->
+  <div class="hud" *ngIf="userRole.toLowerCase().trim() === 'conductor'">
+    <div class="hud-speed" [class.speed-high]="velocidadActual > 60">
+      <span class="speed-num">{{ velocidadActual }}</span>
+      <span class="speed-unit">km/h</span>
+    </div>
+    <div class="hud-divider"></div>
+    <div class="hud-stats">
+      <div class="hud-stat">
+        <ion-icon name="timer-outline"></ion-icon>
+        <span>{{ tiempoStr }}</span>
+      </div>
+      <div class="hud-stat">
+        <ion-icon name="footsteps-outline"></ion-icon>
+        <span>{{ distanciaTotal.toFixed(2) }} km</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FABs FLOTANTES ────────────────────────────────────── -->
+  <div class="float-controls">
+
+    <ion-button class="fab-circle" shape="round" color="light" (click)="centrarMapa()">
+      <ion-icon name="locate-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+
+    <!-- CONDUCTOR -->
+    <ng-container *ngIf="userRole.toLowerCase().trim() === 'conductor'">
+
+      <ion-button class="fab-circle" shape="round"
+        [color]="modoNavegacion ? 'success' : 'light'"
+        (click)="toggleNavegacion()">
+        <ion-icon name="navigate-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="activarTrazarRuta()">
+        <ion-icon name="git-branch-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="resetearTrayectoria()">
+        <ion-icon name="refresh-outline" slot="icon-only" style="color:#E91E63"></ion-icon>
+      </ion-button>
+
+    </ng-container>
+
+    <!-- CIUDADANO -->
+    <ng-container *ngIf="userRole.toLowerCase().trim() === 'ciudadano'">
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="activarTrazarRuta()">
+        <ion-icon name="git-branch-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="mostrarETA()">
+        <ion-icon name="time-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="mostrarRadioCobertura()">
+        <ion-icon name="radio-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="irARutaMasCercana()">
+        <ion-icon name="arrow-redo-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="activarMarcadoRuta()">
+        <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+      <ion-button class="fab-circle" shape="round" color="light" (click)="guardarRutaCiudadano()">
+        <ion-icon name="save-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+
+    </ng-container>
+
+  </div>
+
 </div>

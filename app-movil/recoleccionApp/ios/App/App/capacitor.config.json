@@ -1,0 +1,19 @@
+{
+	"appId": "com.cleanroute.app",
+	"appName": "CleanRoute",
+	"webDir": "www",
+	"server": {
+		"androidScheme": "http"
+	},
+	"packageClassList": [
+		"CapacitorSQLitePlugin",
+		"AppPlugin",
+		"CAPCameraPlugin",
+		"GeolocationPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"PreferencesPlugin",
+		"StatusBarPlugin",
+		"NativeBiometric"
+	]
+}

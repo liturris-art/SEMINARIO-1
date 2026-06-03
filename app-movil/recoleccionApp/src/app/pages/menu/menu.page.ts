@@ -1,49 +1,49 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { MenuController } from '@ionic/angular';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-menu',
   standalone: true,
   templateUrl: './menu.page.html',
   styleUrls: ['./menu.page.scss'],
-  imports: [IonicModule, CommonModule], // 👈 esto está bien
+  imports: [IonicModule, CommonModule],
 })
-export class MenuPage {
+export class MenuPage implements OnInit {
+
+  usuario: { nombre: string; email: string; rol: string; inicial: string } = {
+    nombre: '',
+    email: '',
+    rol: '',
+    inicial: '?',
+  };
+
+  // Hora del saludo
+  saludo = '';
 
   constructor(
     private router: Router,
-    private menuCtrl: MenuController
+    private authService: AuthService,
   ) {}
 
-  async cerrarMenu() {
-    await this.menuCtrl.close();
+  async ngOnInit() {
+    const perfil = await this.authService.getUserProfile();
+    if (perfil) {
+      this.usuario = {
+        nombre:  perfil.nombre  || perfil.email?.split('@')[0] || 'Usuario',
+        email:   perfil.email   || '',
+        rol:     perfil.rol     || '',
+        inicial: (perfil.nombre || perfil.email || 'U')[0].toUpperCase(),
+      };
+    }
+
+    const hora = new Date().getHours();
+    if      (hora < 12) this.saludo = '¡Buenos días';
+    else if (hora < 18) this.saludo = '¡Buenas tardes';
+    else                this.saludo = '¡Buenas noches';
   }
 
-  async verPerfil() {
-    await this.cerrarMenu();
-    this.router.navigate(['/perfil']);
-  }
-
-  async verMapa() {
-    await this.cerrarMenu();
-    this.router.navigate(['/home']);
-  }
-
-  async historial() {
-    await this.cerrarMenu();
-    this.router.navigate(['/historial']);
-  }
-
-  async reportes() {
-    await this.cerrarMenu();
-    this.router.navigate(['/reportes']);
-  }
-
-  async configuracion() {
-    await this.cerrarMenu();
-    this.router.navigate(['/configuracion']);
-  }
+  ir(ruta: string) { this.router.navigate([ruta]); }
 }

@@ -1,21 +1,13 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.cleanroute.app', // 🔥 cambia esto (importante para deep links reales)
+  appId: 'com.cleanroute.app',
   appName: 'CleanRoute',
   webDir: 'www',
-
   server: {
-    androidScheme: 'https'
+    // ⚠️ Debe ser 'http' para que los deep links funcionen en Android
+    androidScheme: 'http',
   },
-
-  plugins: {
-    App: {
-      // 🔥 permite manejar URLs tipo:
-      // recoleccionapp://reset-password
-      urlScheme: 'recoleccionapp'
-    }
-  }
 };
 
 export default config;

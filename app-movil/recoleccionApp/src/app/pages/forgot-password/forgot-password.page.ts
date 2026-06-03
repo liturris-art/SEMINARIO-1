@@ -3,16 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonInput,
-  IonButton,
-  IonItem,
-  IonIcon
+  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonInput, IonButton, IonItem, IonIcon, IonSpinner,
+  ToastController,
 } from '@ionic/angular/standalone';
-
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -21,39 +15,36 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./forgot-password.page.scss'],
   standalone: true,
   imports: [
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonInput,
-    IonButton,
-    IonItem,
-    IonIcon,
-    FormsModule,
-    CommonModule,
-    RouterModule
-  ]
+    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonInput, IonButton, IonItem, IonIcon, IonSpinner,
+    FormsModule, CommonModule, RouterModule,
+  ],
 })
 export class ForgotPasswordPage {
+  email     = '';
+  isLoading = false;
+  enviado   = false;
 
-  email: string = '';
-
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService, private toastCtrl: ToastController) {}
 
   async reset() {
+    if (!this.email || !this.email.includes('@'))
+      return this.showToast('Ingresa un correo válido', 'warning');
 
+    this.isLoading = true;
     try {
-
       await this.auth.resetPassword(this.email);
-
-      alert("Revisa tu correo para cambiar la contraseña");
-
+      this.enviado = true;
+      this.showToast('📧 Revisa tu correo', 'success');
     } catch (error: any) {
-
-      alert(error.message);
-
+      this.showToast(error.message || 'Error al enviar el correo', 'danger');
+    } finally {
+      this.isLoading = false;
     }
-
   }
 
+  private async showToast(message: string, color: 'success' | 'warning' | 'danger') {
+    const toast = await this.toastCtrl.create({ message, color, duration: 4000, position: 'top' });
+    await toast.present();
+  }
 }

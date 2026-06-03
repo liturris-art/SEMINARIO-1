@@ -1,79 +1,75 @@
-<ion-app>
+<ion-content class="menu-content">
 
-  <!-- HEADER -->
-  <ion-header>
-    <ion-toolbar style="--background:#e91e63; --color:white;">
-      <ion-title>Panel de Opciones</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- ══ HERO HEADER ══════════════════════════════════════ -->
+  <div class="hero">
+    <div class="hero-bg"></div>
 
-  <!-- CONTENIDO -->
-  <ion-content class="dashboard-content">
+    <div class="hero-body">
+      <div class="avatar">{{ usuario.inicial }}</div>
 
-    <!-- TARJETA PRINCIPAL -->
-    <ion-card class="welcome-card">
+      <div class="hero-text">
+        <p class="saludo">{{ saludo }},</p>
+        <h2 class="nombre">{{ usuario.nombre }}</h2>
+        <span class="rol-badge">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          {{ usuario.rol || 'Usuario' }}
+        </span>
+      </div>
 
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="car-outline"></ion-icon>
-          Bienvenido
-        </ion-card-title>
+      <ion-button fill="clear" class="settings-btn" (click)="ir('/configuracion')">
+        <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
 
-        <ion-card-subtitle>
-          Gestión inteligente de recorridos
-        </ion-card-subtitle>
-      </ion-card-header>
+  <!-- ══ GRID DE OPCIONES ═════════════════════════════════ -->
+  <div class="grid-wrapper">
 
-      <ion-card-content>
-        Selecciona una opción para continuar.
-      </ion-card-content>
+    <!-- Mapa — tarjeta grande destacada -->
+    <div class="card card-large card-mapa" (click)="ir('/home')">
+      <div class="card-icon-wrap">
+        <ion-icon name="map-outline"></ion-icon>
+      </div>
+      <div class="card-info">
+        <h3>Mapa en vivo</h3>
+        <p>Ver rutas y seguimiento GPS</p>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+    </div>
 
-    </ion-card>
+    <!-- Fila de dos tarjetas -->
+    <div class="row-2">
 
-    <!-- GRID DE OPCIONES -->
-    <ion-grid>
+      <div class="card card-sm card-perfil" (click)="ir('/perfil')">
+        <div class="card-icon-wrap">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <h3>Perfil</h3>
+        <p>Mi cuenta</p>
+      </div>
 
-      <ion-row>
+      <div class="card card-sm card-historial" (click)="ir('/historial')">
+        <div class="card-icon-wrap">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <h3>Historial</h3>
+        <p>Recorridos</p>
+      </div>
 
-        <ion-col size="6">
-          <ion-button expand="block" class="btn-main" (click)="verPerfil()">
-            <ion-icon slot="top" name="person-outline"></ion-icon>
-            Perfil
-          </ion-button>
-        </ion-col>
+    </div>
 
-        <ion-col size="6">
-          <ion-button expand="block" class="btn-main" (click)="verMapa()">
-            <ion-icon slot="top" name="map-outline"></ion-icon>
-            Mapa
-          </ion-button>
-        </ion-col>
+    <!-- Reportes — tarjeta mediana -->
+    <div class="card card-medium card-reportes" (click)="ir('/reportes')">
+      <div class="card-icon-wrap">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+      </div>
+      <div class="card-info">
+        <h3>Reportes</h3>
+        <p>Estadísticas y resúmenes de actividad</p>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+    </div>
 
-        <ion-col size="6">
-          <ion-button expand="block" class="btn-main" (click)="historial()">
-            <ion-icon slot="top" name="time-outline"></ion-icon>
-            Historial
-          </ion-button>
-        </ion-col>
+  </div>
 
-        <ion-col size="6">
-          <ion-button expand="block" class="btn-main" (click)="reportes()">
-            <ion-icon slot="top" name="alert-circle-outline"></ion-icon>
-            Reportes
-          </ion-button>
-        </ion-col>
-
-        <ion-col size="12">
-          <ion-button expand="block" class="btn-secondary" (click)="configuracion()">
-            <ion-icon slot="start" name="settings-outline"></ion-icon>
-            Configuración
-          </ion-button>
-        </ion-col>
-
-      </ion-row>
-
-    </ion-grid>
-
-  </ion-content>
-
-</ion-app>
+</ion-content>
