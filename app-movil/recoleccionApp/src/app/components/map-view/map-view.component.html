@@ -39,7 +39,7 @@
   </div>
 
   <!-- ── MAPA ──────────────────────────────────────────────── -->
-  <div id="map"></div>
+  <div class="map-container" #mapContainer></div>
 
   <!-- ── BANNER MODO TRAZAR ────────────────────────────────── -->
   <div class="hint-banner" *ngIf="modoTrazarRuta">
@@ -51,7 +51,15 @@
   <div class="ruta-badge" *ngIf="distanciaRuta">
     <ion-icon name="navigate-outline"></ion-icon>
     <span>{{ distanciaRuta }}</span>
-    <ion-button size="small" fill="clear" color="medium" (click)="limpiarRutaAB()">
+    <input class="ruta-nombre-input" type="text" placeholder="Nombre de la ruta"
+      [(ngModel)]="nombreRutaTrazada" [disabled]="guardandoRutaTrazada" />
+    <ion-button size="small" fill="clear" color="success"
+      [disabled]="!nombreRutaTrazada.trim() || guardandoRutaTrazada"
+      (click)="guardarRutaTrazada()">
+      <ion-spinner *ngIf="guardandoRutaTrazada" name="crescent" slot="icon-only" style="width:16px;height:16px"></ion-spinner>
+      <ion-icon *ngIf="!guardandoRutaTrazada" name="save-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+    <ion-button size="small" fill="clear" color="medium" [disabled]="guardandoRutaTrazada" (click)="limpiarRutaAB()">
       <ion-icon name="close-outline" slot="icon-only"></ion-icon>
     </ion-button>
   </div>
@@ -70,7 +78,7 @@
       </div>
       <div class="hud-stat">
         <ion-icon name="footsteps-outline"></ion-icon>
-        <span>{{ distanciaTotal.toFixed(2) }} km</span>
+        <span>{{ distanciaTotalStr }} {{ unidadDistancia }}</span>
       </div>
     </div>
   </div>

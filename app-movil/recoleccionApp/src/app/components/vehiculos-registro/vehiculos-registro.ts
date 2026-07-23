@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { environment } from '../../../environments/environments';
+import { environment } from '../../../environments/environment';
 import { VehiculosService } from '../../services/vehiculos/vehiculos';
 import { Vehiculo } from '../../../interfaces/Vehiculo';
 import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 @Component({
@@ -12,7 +13,8 @@ import { Router } from '@angular/router';
   imports: [
     CommonModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    IonicModule,
   ],
   selector: 'app-vehiculos-registro',
   templateUrl: './vehiculos-registro.html',
@@ -25,8 +27,8 @@ export class VehiculosRegistro {
   datos: Vehiculo = {
     perfil_id: this.perfilUrl, 
     placa: '',
-    marca: null,
-    modelo: null,
+    marca: '',
+    modelo: '',
     activo: true,
   };
 
@@ -37,6 +39,14 @@ export class VehiculosRegistro {
   constructor(private vehiculosService: VehiculosService, private router: Router) { }
 
   registroVehiculo() {
+    // El botón es type="button" (no dispara ngSubmit) y no hay
+    // FormGroup/Validators detrás del `required` del input — validar
+    // aquí para no poder registrar un vehículo con campos vacíos.
+    if (!this.datos.placa?.trim() || !this.datos.marca?.trim() || !this.datos.modelo?.trim()) {
+      this.errorMensaje = 'Completa placa, marca y modelo antes de registrar.';
+      this.modalErrorVisible = true;
+      return;
+    }
     this.vehiculosService.createVehiculo(this.datos).subscribe({
       next: () => {
         this.modalSuccessVisible = true;

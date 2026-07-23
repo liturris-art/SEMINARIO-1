@@ -15,8 +15,12 @@ export class VehiculosService {
 
   constructor(private http: HttpClient) {}
 
-  getVehiculos(): Observable<{ data: Vehiculo[] }> {
-    return this.http.get<{ data: Vehiculo[] }>(
+  // El API devuelve un array plano ([...]) para este endpoint, no
+  // envuelto en {data: [...]} como el resto — confirmado contra el
+  // Swagger (/docs). Antes esto hacía que la lista de vehículos
+  // pareciera siempre vacía ("no hay vehículos registrados").
+  getVehiculos(): Observable<Vehiculo[]> {
+    return this.http.get<Vehiculo[]>(
       `${this.apiUrl}/vehiculos?perfil_id=${this.perfilUrl}`,
     );
   }

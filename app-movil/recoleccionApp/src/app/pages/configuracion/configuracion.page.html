@@ -38,11 +38,10 @@
             <span class="cfg-row-sub">Acceso biométrico al iniciar</span>
           </div>
         </div>
-        <ion-toggle
-          [checked]="prefs.biometria"
-          (ionChange)="onToggleBiometria($event)"
-          color="success">
-        </ion-toggle>
+        <label class="switch">
+          <input type="checkbox" [checked]="prefs.biometria" (change)="onToggleBiometria($event)">
+          <span class="slider"></span>
+        </label>
       </div>
 
       <div class="cfg-separator" *ngIf="biometricDisponible"></div>
@@ -79,11 +78,10 @@
             <span class="cfg-row-sub">Alertas de rutas y recolección</span>
           </div>
         </div>
-        <ion-toggle
-          [checked]="prefs.notificaciones"
-          (ionChange)="onToggle('notificaciones', $event)"
-          color="success">
-        </ion-toggle>
+        <label class="switch">
+          <input type="checkbox" [checked]="prefs.notificaciones" (change)="onToggle('notificaciones', $event)">
+          <span class="slider"></span>
+        </label>
       </div>
 
       <div class="cfg-separator"></div>
@@ -98,11 +96,10 @@
             <span class="cfg-row-sub">Capa oscura en el mapa</span>
           </div>
         </div>
-        <ion-toggle
-          [checked]="prefs.modoOscuro"
-          (ionChange)="onToggle('modoOscuro', $event)"
-          color="success">
-        </ion-toggle>
+        <label class="switch">
+          <input type="checkbox" [checked]="prefs.modoOscuro" (change)="onToggle('modoOscuro', $event)">
+          <span class="slider"></span>
+        </label>
       </div>
 
       <div class="cfg-separator"></div>
@@ -117,11 +114,10 @@
             <span class="cfg-row-sub">Mayor exactitud, más batería</span>
           </div>
         </div>
-        <ion-toggle
-          [checked]="prefs.gpsAlta"
-          (ionChange)="onToggle('gpsAlta', $event)"
-          color="success">
-        </ion-toggle>
+        <label class="switch">
+          <input type="checkbox" [checked]="prefs.gpsAlta" (change)="onToggle('gpsAlta', $event)">
+          <span class="slider"></span>
+        </label>
       </div>
 
       <div class="cfg-separator"></div>
@@ -136,14 +132,13 @@
             <span class="cfg-row-sub">Kilómetros o millas</span>
           </div>
         </div>
-        <ion-select
+        <select
+          class="cfg-select-native"
           [value]="prefs.unidadDistancia"
-          (ionChange)="onSelectChange('unidadDistancia', $event)"
-          interface="popover"
-          class="cfg-select">
-          <ion-select-option value="km">km</ion-select-option>
-          <ion-select-option value="mi">mi</ion-select-option>
-        </ion-select>
+          (change)="onSelectChange('unidadDistancia', $event)">
+          <option value="km">km</option>
+          <option value="mi">mi</option>
+        </select>
       </div>
 
     </div>
@@ -220,4 +215,10 @@
     <ion-icon name="log-out-outline" slot="start"></ion-icon>
     Cerrar sesión
   </ion-button>
+</div>
+
+<!-- ══ OVERLAY CERRANDO SESIÓN ═══════════════════════════ -->
+<div class="cerrando-overlay" *ngIf="cerrandoSesion">
+  <div class="cerrando-spinner"></div>
+  <p>Cerrando sesión...</p>
 </div>

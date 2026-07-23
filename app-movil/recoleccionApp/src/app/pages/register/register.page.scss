@@ -78,4 +78,11 @@
   h2 { font-size: 24px; font-weight: 700; color: #1a1a2e; margin: 0; }
   p  { font-size: 14px; color: #aaa; margin: 0; }
 }
-.listo-icon { font-size: 80px; color: #1D9E75; }
+.listo-icon {
+  font-size: 80px; color: #1D9E75;
+  animation: listoPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes listoPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}

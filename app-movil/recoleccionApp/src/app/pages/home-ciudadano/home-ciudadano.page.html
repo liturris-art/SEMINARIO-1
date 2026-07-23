@@ -68,10 +68,10 @@
       <div class="proxima-card">
         <ion-icon name="calendar-outline" class="proxima-icon"></ion-icon>
         <div class="proxima-info">
-          <span class="proxima-label">Próxima recolección</span>
+          <span class="proxima-label">{{ proximaRuta || 'Próxima recolección' }}</span>
           <span class="proxima-fecha">{{ proximaFecha }}</span>
         </div>
-        <div class="proxima-hora">{{ proximaHora }}</div>
+        <div class="proxima-hora" *ngIf="proximaHora">{{ proximaHora }}</div>
       </div>
 
       <!-- CTA login si es anónimo -->

@@ -72,9 +72,10 @@
       <ion-item class="input-item">
         <ion-input label="Teléfono" label-placement="floating" type="tel" [(ngModel)]="telefono"></ion-input>
       </ion-item>
-      <ion-button expand="block" color="success" class="save-btn" (click)="guardar()">
-        <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-        Guardar cambios
+      <ion-button expand="block" color="success" class="save-btn" [disabled]="guardando" (click)="guardar()">
+        <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!guardando" name="checkmark-outline" slot="start"></ion-icon>
+        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
       </ion-button>
     </div>
 

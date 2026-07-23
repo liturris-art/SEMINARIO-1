@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import * as L from 'leaflet';
 import 'leaflet-draw';
 import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
 import { CallesService } from '../../services/calles/calles';
 import { Calle } from '../../../interfaces/Calles';
 import { RutasService } from '../../services/rutas/rutas';
 import { Ruta as RutaModel } from '../../../interfaces/Rutas';
-import { environment } from '../../../environments/environments';
+import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth/AuthService';
+import { AuthService } from '../../services/auth.service';
 
 interface Ruta {
   id: number;
@@ -22,7 +23,7 @@ interface Ruta {
 @Component({
   selector: 'app-rutas-mapa',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IonicModule],
   templateUrl: './rutas-lista.html',
   styleUrls: ['./rutas-lista.css']
 })
@@ -484,14 +485,8 @@ export class RutasMapaComponent implements AfterViewInit, OnDestroy {
   }
 
   logout() {
-    this.authService.signOut().subscribe({
-      next: () => {
-        this.router.navigate(['/login']); // Redirige al login después del logout
-      },
-      error: (err) => {
-        console.error('Error al cerrar sesión:', err);
-      }
-    });
+    // AuthService.logout() ya hace signOut() en Supabase y navega a /login.
+    this.authService.logout();
   }
   
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -22,12 +22,12 @@ export class PerfilPage implements OnInit {
   editando  = false;
   nombre    = '';
   telefono  = '';
+  guardando = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private toastCtrl: ToastController,
-    private loadingCtrl: LoadingController,
   ) {}
 
   async ngOnInit() {
@@ -51,8 +51,10 @@ export class PerfilPage implements OnInit {
   }
 
   async guardar() {
-    const loading = await this.loadingCtrl.create({ message: 'Guardando...' });
-    await loading.present();
+    // No se usa LoadingController/ion-loading: ver nota en
+    // configuracion.page.ts (cerrarSesion) — su overlay no llega a
+    // aparecer en el WebView nativo de Android.
+    this.guardando = true;
     try {
       // Actualiza metadata en Supabase
       const supabase = (this.authService as any).supabaseService?.getClient?.();
@@ -69,7 +71,7 @@ export class PerfilPage implements OnInit {
     } catch {
       this.showToast('Error al guardar', 'danger');
     } finally {
-      await loading.dismiss();
+      this.guardando = false;
     }
   }
 

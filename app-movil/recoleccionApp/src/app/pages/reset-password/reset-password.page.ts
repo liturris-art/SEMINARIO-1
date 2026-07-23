@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle,
   IonInput, IonButton, IonItem, IonIcon, IonSpinner,
-  ToastController, LoadingController,
+  ToastController,
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase.service';
@@ -27,13 +27,13 @@ export class ResetPasswordPage implements OnInit {
   showPassword    = false;
   sesionActiva    = false;
   verificando     = true;
+  guardando       = false;
 
   constructor(
     private auth: AuthService,
     private supabaseService: SupabaseService,
     private router: Router,
     private toastCtrl: ToastController,
-    private loadingCtrl: LoadingController,
   ) {}
 
   async ngOnInit() {
@@ -66,17 +66,18 @@ export class ResetPasswordPage implements OnInit {
     if (this.password !== this.confirmPassword)
       return this.showToast('Las contraseñas no coinciden', 'danger');
 
-    const loading = await this.loadingCtrl.create({ message: 'Actualizando contraseña...' });
-    await loading.present();
-
+    // No se usa LoadingController/ion-loading: ver nota en
+    // configuracion.page.ts (cerrarSesion) — su overlay no llega a
+    // aparecer en el WebView nativo de Android.
+    this.guardando = true;
     try {
       await this.auth.updatePassword(this.password);
-      await loading.dismiss();
       await this.showToast('✅ Contraseña actualizada correctamente', 'success');
       setTimeout(() => this.router.navigate(['/login'], { replaceUrl: true }), 1500);
     } catch (error: any) {
-      await loading.dismiss();
       this.showToast(error.message || 'Error al actualizar la contraseña', 'danger');
+    } finally {
+      this.guardando = false;
     }
   }
 

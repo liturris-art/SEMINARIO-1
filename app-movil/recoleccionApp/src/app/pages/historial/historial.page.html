@@ -57,13 +57,17 @@
       <div class="rec-body">
         <div class="rec-header">
           <span class="rec-fecha">{{ fecha(r.inicio) }}</span>
-          <span class="rec-badge" [class.badge-activo]="!r.fin">
-            {{ r.fin ? 'Completado' : 'En curso' }}
+          <span class="rec-badge"
+            [class.badge-activo]="!r.fin && r.estado !== 'suspendido' && r.estado !== 'programada'"
+            [class.badge-suspendido]="r.estado === 'suspendido'"
+            [class.badge-programado]="r.estado === 'programada'">
+            {{ etiqueta(r) }}
           </span>
         </div>
+        <span class="rec-ruta" *ngIf="r.nombre_ruta">{{ r.nombre_ruta }}</span>
         <div class="rec-stats">
           <span><ion-icon name="timer-outline"></ion-icon> {{ duracion(r) }}</span>
-          <span><ion-icon name="car-outline"></ion-icon> {{ r.vehiculo_id || '—' }}</span>
+          <span><ion-icon name="car-outline"></ion-icon> {{ r.placa || r.vehiculo_id || '—' }}</span>
         </div>
       </div>
     </div>

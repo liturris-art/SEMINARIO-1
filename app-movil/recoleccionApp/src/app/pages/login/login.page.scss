@@ -88,6 +88,12 @@
   font-weight: bold;
 
   margin-top: 15px;
+
+  transition: --background 0.25s ease;
+}
+
+.login-btn-success {
+  --background: #22c55e;
 }
 
 /* BOTONES SECUNDARIOS */
@@ -116,6 +122,31 @@
 }
 
 .biometric-btn {
+
+  --border-color: #e91e63;
+
+  --color: #e91e63;
+
+  --border-radius: 12px;
+
+  height: 45px;
+}
+
+/* MAPA COMO CIUDADANO */
+
+.ciudadano-access {
+
+  margin-top: 20px;
+
+  text-align: center;
+
+  p {
+    color: #666;
+    font-size: 13px;
+  }
+}
+
+.ciudadano-btn {
 
   --border-color: #e91e63;
 

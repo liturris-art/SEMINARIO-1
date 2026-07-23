@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { conTimeout } from '../../utils/con-timeout';
 
 /**
  * HomePage — solo enruta al rol correcto.
@@ -33,7 +34,12 @@ export class HomePage implements OnInit {
 
   async ngOnInit() {
     try {
-      const perfil = await this.authService.getUserProfile();
+      // Con límite de tiempo: si Supabase se queda colgado verificando la
+      // sesión (visto en este WebView tras reanudar desde segundo plano),
+      // esta pantalla se quedaba con el spinner girando para siempre en
+      // vez de decidir algo. Pasados 6s, se trata como "sin perfil" y cae
+      // a la vista pública de ciudadano en vez de quedarse pegada.
+      const perfil = await conTimeout(this.authService.getUserProfile(), 6000, null);
       const rol    = perfil?.rol?.toLowerCase().trim() || '';
 
       if (rol === 'conductor') {

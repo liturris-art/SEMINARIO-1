@@ -36,6 +36,12 @@ export const routes: Routes = [
   { path: 'reportes',      canActivate: [authGuard], loadComponent: () => import('./pages/reportes/reportes.page').then(m => m.ReportesPage) },
   { path: 'perfil',        canActivate: [authGuard], loadComponent: () => import('./pages/perfil/perfil.page').then(m => m.PerfilPage) },
 
+  // ── GESTIÓN DE FLOTA Y RUTAS ─────────────────────────────────
+  { path: 'vehiculos',              canActivate: [authGuard], loadComponent: () => import('./components/vehiculos-lista/vehiculos-lista').then(m => m.VehiculosListaComponent) },
+  { path: 'vehiculos/registro',     canActivate: [authGuard], loadComponent: () => import('./components/vehiculos-registro/vehiculos-registro').then(m => m.VehiculosRegistro) },
+  { path: 'vehiculos/editar/:id',   canActivate: [authGuard], loadComponent: () => import('./components/vehiculos-actualizacion/vehiculos-actualizacion').then(m => m.VehiculosActualizacion) },
+  { path: 'rutas',                  canActivate: [authGuard], loadComponent: () => import('./components/rutas-lista/rutas-lista').then(m => m.RutasMapaComponent) },
+
   // ── WILDCARD ────────────────────────────────────────────────
   { path: '**', redirectTo: 'home' },
 ];

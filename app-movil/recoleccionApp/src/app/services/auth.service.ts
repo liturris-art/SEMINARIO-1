@@ -53,8 +53,16 @@ export class AuthService {
     return data.user;
   }
 
+  // getSession() lee la sesión ya persistida localmente y solo llama a la
+  // red si el token realmente necesita refrescarse. getUser(), en cambio,
+  // SIEMPRE hace una llamada de red para revalidar contra el servidor —
+  // usarlo aquí hacía que cada navegación (incluida la del mapa) disparara
+  // una llamada de red innecesaria antes de poder decidir el rol/mostrar
+  // el perfil, sumándose a otras llamadas similares en la misma cadena de
+  // navegación y sintiéndose como que la app se quedaba pegada.
   async getUserProfile() {
-    const user = await this.getUser();
+    const { data } = await this.supabase.auth.getSession();
+    const user = data.session?.user;
     if (!user) return null;
     return {
       id:        user.id,
@@ -72,8 +80,8 @@ export class AuthService {
   }
 
   async getUserRole(): Promise<string> {
-    const user = await this.getUser();
-    return user?.user_metadata?.['rol'] || '';
+    const { data } = await this.supabase.auth.getSession();
+    return data.session?.user?.user_metadata?.['rol'] || '';
   }
 
   async resetPassword(email: string) {

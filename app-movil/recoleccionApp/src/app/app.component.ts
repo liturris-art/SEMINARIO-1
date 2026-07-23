@@ -1,14 +1,26 @@
 import { Component } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { App } from '@capacitor/app';
-import { IonApp, IonRouterOutlet, AlertController } from '@ionic/angular/standalone';
+import { Preferences } from '@capacitor/preferences';
+import { IonApp, IonRouterOutlet, AlertController, ToastController } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service';
 import { SupabaseService } from './services/supabase.service';
 import { OfflineSqliteService } from './services/offline-sqlite.service';
 import { filter } from 'rxjs/operators';
+import { conTimeout } from './utils/con-timeout';
 
 // Rutas donde el botón atrás debe cerrar la app en vez de navegar
 const RUTAS_RAIZ = ['/home', '/menu', '/login'];
+
+// ── Caducidad de sesión por inactividad ──────────────────────
+// Antes la sesión de Supabase se quedaba abierta para siempre: cerrar y
+// volver a abrir la app te dejaba exactamente donde ibas, sin pedir login
+// de nuevo. Ahora, si la app estuvo en segundo plano más de este tiempo,
+// se cierra la sesión — salvo que haya un recorrido activo (no tiene
+// sentido desloguear a un conductor a mitad de una ruta real).
+const SESION_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutos
+const KEY_ULTIMO_BACKGROUND = 'ultimoBackgroundEn';
+const KEY_RECORRIDO_ACTIVO  = 'recorridoActivoId';
 
 @Component({
   selector: 'app-root',
@@ -26,11 +38,61 @@ export class AppComponent {
     private offlineService: OfflineSqliteService,
     private router:        Router,
     private alertCtrl:     AlertController,
+    private toastCtrl:     ToastController,
   ) {
     this.initializeApp();
     this.escucharDeepLinks();
     this.rastrearHistorial();
     this.manejarBotonAtras();
+    this.rastrearInactividad();
+  }
+
+  // ── Caducidad de sesión ───────────────────────────────────
+  // Guarda cuándo la app pasó a segundo plano, y al volver a primer
+  // plano revisa si ya pasó el tiempo límite para forzar el logout.
+  private rastrearInactividad() {
+    App.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) {
+        // OJO: no llamar aquí a otro método que también use
+        // supabase.auth.getSession() en paralelo (ya lo hace
+        // verificarExpiracionSesion() vía isLoggedIn()). supabase-js
+        // serializa sus llamadas de auth con un lock interno, y dos
+        // llamadas concurrentes en este WebView pueden quedar
+        // esperándose una a la otra indefinidamente.
+        this.verificarExpiracionSesion();
+      } else {
+        Preferences.set({ key: KEY_ULTIMO_BACKGROUND, value: Date.now().toString() });
+      }
+    });
+  }
+
+  private async verificarExpiracionSesion() {
+    try {
+      const { value } = await Preferences.get({ key: KEY_ULTIMO_BACKGROUND });
+      if (!value) return; // nunca estuvo en segundo plano en esta instalación
+
+      const inactivoMs = Date.now() - parseInt(value, 10);
+      if (inactivoMs < SESION_TIMEOUT_MS) return;
+
+      // No desloguear si hay un recorrido en curso: el conductor puede
+      // llevar horas manejando con la pantalla apagada.
+      const { value: recorridoActivo } = await Preferences.get({ key: KEY_RECORRIDO_ACTIVO });
+      if (recorridoActivo) return;
+
+      const logueado = await conTimeout(this.authService.isLoggedIn(), 6000, false);
+      if (logueado) {
+        await this.authService.logout();
+        // Antes esto pasaba en silencio — se sentía como que la app fallaba
+        // sin razón en vez de explicar por qué se volvió al login.
+        const t = await this.toastCtrl.create({
+          message: 'Cerramos tu sesión por inactividad. Vuelve a ingresar.',
+          color: 'warning', duration: 3500, position: 'top',
+        });
+        await t.present();
+      }
+    } catch (e) {
+      console.warn('Error verificando expiración de sesión:', e);
+    }
   }
 
   // ── FIX #14: rastrear historial de rutas ─────────────────
@@ -72,7 +134,9 @@ export class AppComponent {
 
         // Verificar sesión antes de navegar a login
         if (anterior?.includes('login')) {
-          const logueado = await this.authService.isLoggedIn();
+          let logueado = false;
+          try { logueado = await this.authService.isLoggedIn(); }
+          catch (e) { console.warn('Error verificando sesión en botón atrás:', e); }
           if (logueado) {
             this.router.navigate(['/menu'], { replaceUrl: true });
             return;
@@ -122,10 +186,15 @@ export class AppComponent {
     try {
       await this.offlineService.init();
 
+      // Cubre el arranque en frío: si Android mató el proceso mientras
+      // estaba en segundo plano, "appStateChange" nunca se dispara y el
+      // único momento para revisar la caducidad es este.
+      await this.verificarExpiracionSesion();
+
       // FIX #4: no redirigir a login — dejar que las rutas decidan
       // El ciudadano entra directo, el conductor ve el home y puede
       // usar las funciones públicas del mapa sin autenticarse.
-      const isLogged = await this.authService.isLoggedIn();
+      const isLogged = await conTimeout(this.authService.isLoggedIn(), 6000, false);
       if (!isLogged) {
         // Solo redirigir a home (vista pública), NO a login
         const url = this.router.url;

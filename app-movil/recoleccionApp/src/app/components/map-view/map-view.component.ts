@@ -1,14 +1,17 @@
 import {
   Component, AfterViewInit, Input, OnDestroy,
-  ChangeDetectorRef, NgZone
+  ChangeDetectorRef, NgZone, ViewChild, ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { Geolocation } from '@capacitor/geolocation';
 import { Preferences } from '@capacitor/preferences';
+import { firstValueFrom } from 'rxjs';
 import * as L from 'leaflet';
 import { environment } from '../../../environments/environment';
+import { PreferenciasService } from '../../services/preferencias.service';
+import { RutasService } from '../../services/rutas/rutas';
 
 interface Incidencia { lat: number; lng: number; tipo: string; hora: string; }
 
@@ -48,6 +51,12 @@ const ATTR_MAPBOX = '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> 
 })
 export class MapViewComponent implements AfterViewInit, OnDestroy {
 
+  // Referencia directa al contenedor en vez de un id fijo (ver comentario
+  // en inicializarMapa): con un id fijo, L.map('map') hace
+  // document.getElementById y puede engancharse al <div> de una página
+  // anterior que Ionic mantiene oculta en el DOM del ion-router-outlet.
+  @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
+
   @Input() rutas:    any[]  = [];
   @Input() calles:   any[]  = [];
   @Input() userRole: string = '';
@@ -78,6 +87,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   radioCercano:     L.Circle | null  = null;
   etaMarker:        L.Marker | null  = null;
   miUbicacionMark:  L.Marker | null  = null;   // ← NUEVO: marcador de posición propia
+  private watchIdUbicacion: string | null = null;
 
   // ── Búsqueda ─────────────────────────────────────────────
   busquedaQuery    = '';
@@ -95,6 +105,12 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   faseTrazado: 'A'|'B' = 'A';
   distanciaRuta  = '';
 
+  // Geometría GeoJSON ([lon,lat], igual que la que devuelve/consume el
+  // backend) de la última ruta A→B trazada, lista para guardar.
+  private geoRutaTrazada: [number, number][] | null = null;
+  nombreRutaTrazada  = '';
+  guardandoRutaTrazada = false;
+
   // ── Tooltips de FABs ─────────────────────────────────────
   fabTooltip = '';   // texto del tooltip activo
 
@@ -105,20 +121,64 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   pinBIcon   = L.divIcon({ className:'', html:'<div class="pin-b">B</div>', iconSize:[32,32], iconAnchor:[16,32] });
   miPosIcon  = L.divIcon({ className:'', html:'<div class="mi-pos-icon"></div>', iconSize:[20,20], iconAnchor:[10,10] });
 
-  constructor(private cdr: ChangeDetectorRef, private zone: NgZone) {}
+  // ── Overlay de confirmación de ruta (fuera del árbol de Angular) ──
+  private confirmacionRutaEl: HTMLElement | null = null;
 
-  ngAfterViewInit() { setTimeout(() => { this.inicializarMapa(); this.iniciarTimer(); }, 300); }
-  ngOnDestroy()     { this.detenerTimer(); if (this.map) this.map.remove(); }
+  // Recalcula el tamaño del mapa cada vez que su contenedor cambia de
+  // tamaño real (fin de la transición de página de Ionic, vuelta desde
+  // la cámara, cambio de orientación, teclado, etc.). Antes solo se
+  // llamaba invalidateSize() una vez con un setTimeout fijo, y si la
+  // transición de la página tardaba más que eso, el mapa quedaba
+  // calculado con tamaño 0 y las teselas no cargaban hasta recargar.
+  private resizeObserver: ResizeObserver | null = null;
+
+  // ── Preferencias (Configuración) ─────────────────────────
+  gpsAlta         = true;
+  unidadDistancia: 'km' | 'mi' = 'km';
+
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private zone: NgZone,
+    private prefsService: PreferenciasService,
+    private rutasService: RutasService,
+    private toastCtrl: ToastController,
+  ) {}
+
+  ngAfterViewInit() {
+    setTimeout(async () => {
+      const prefs = await this.prefsService.obtener();
+      this.gpsAlta = prefs.gpsAlta;
+      this.unidadDistancia = prefs.unidadDistancia;
+      if (prefs.modoOscuro) this.capaActual = 'oscuro';
+      this.inicializarMapa();
+      this.iniciarTimer();
+    }, 300);
+  }
+  ngOnDestroy() {
+    this.detenerTimer();
+    this.resizeObserver?.disconnect();
+    if (this.watchIdUbicacion) Geolocation.clearWatch({ id: this.watchIdUbicacion });
+    if (this.confirmacionRutaEl?.parentNode) this.confirmacionRutaEl.parentNode.removeChild(this.confirmacionRutaEl);
+    if (this.map) this.map.remove();
+  }
 
   // ─────────────────────────────────────────────────────────
   // MAPA
   // ─────────────────────────────────────────────────────────
   inicializarMapa() {
-    this.map = L.map('map', { zoomControl: false, attributionControl: true })
+    // Ionic (ion-router-outlet) no destruye siempre la página anterior al
+    // navegar — la deja oculta en el DOM para las transiciones/gesto de
+    // "volver". Con un id="map" fijo, L.map('map') podía engancharse al
+    // contenedor viejo y oculto de esa página anterior en vez del nuevo,
+    // dejando el mapa visible sin inicializar hasta recargar la app.
+    // Usar la referencia directa del elemento evita ese choque de ids.
+    this.map = L.map(this.mapContainer.nativeElement, { zoomControl: false, attributionControl: true })
                 .setView([4.6097, -74.0817], 13);
 
     // Tile Mapbox con tileSize 512 y zoomOffset -1 (requerido por Mapbox)
-    this.tileLayer = L.tileLayer(TILE_LAYERS.estandar, {
+    // capaActual ya viene ajustada a 'oscuro' en ngAfterViewInit si el
+    // usuario activó "Modo oscuro" en Configuración.
+    this.tileLayer = L.tileLayer(TILE_LAYERS[this.capaActual], {
       maxZoom:    22,
       tileSize:   512,
       zoomOffset: -1,
@@ -128,13 +188,24 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
     L.control.zoom({ position: 'bottomright' }).addTo(this.map);
     setTimeout(() => this.map.invalidateSize(), 300);
 
+    // Recalcular tamaño automáticamente ante cualquier cambio real del
+    // contenedor (ver comentario en la declaración de resizeObserver).
+    this.resizeObserver = new ResizeObserver(() => this.map?.invalidateSize());
+    this.resizeObserver.observe(this.map.getContainer());
+
     this.dibujarRutas();
     this.inicializarCluster();
     this.cargarRutaGuardada();
-    this.centrarEnUbicacion();   // ← centra automáticamente al abrir
+    this.centrarEnUbicacion();       // ← centra automáticamente al abrir
+    this.iniciarSeguimientoUbicacion(); // ← punto azul que sigue en vivo
 
     this.map.on('click', (e: L.LeafletMouseEvent) => this.onMapClick(e));
   }
+
+  // Llamado desde ionViewDidEnter() de la página anfitriona: refuerza
+  // el ResizeObserver para el caso en que el contenedor ya tenía su
+  // tamaño final antes de que terminara la transición de Ionic.
+  invalidateSize() { this.map?.invalidateSize(); }
 
   cambiarCapa(capa: keyof typeof TILE_LAYERS) {
     this.capaActual = capa;
@@ -170,15 +241,9 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   // ─────────────────────────────────────────────────────────
   async centrarEnUbicacion() {
     try {
-      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: this.gpsAlta });
       const lat = pos.coords.latitude, lng = pos.coords.longitude;
-
-      // Marcador de posición propia (punto azul pulsante)
-      if (this.miUbicacionMark) this.map.removeLayer(this.miUbicacionMark);
-      this.miUbicacionMark = L.marker([lat, lng], { icon: this.miPosIcon })
-        .addTo(this.map)
-        .bindPopup('<strong>📍 Tu ubicación</strong>');
-
+      this.actualizarMiUbicacion(lat, lng);
       // Animación suave flyTo (mejor que setView)
       this.map.flyTo([lat, lng], 15, { animate: true, duration: 1.2 });
     } catch { console.warn('No se pudo obtener ubicación'); }
@@ -186,6 +251,33 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
 
   // Alias para el botón de centrar (mantiene compatibilidad)
   async centrarMapa() { await this.centrarEnUbicacion(); }
+
+  // Punto azul de "tu ubicación": antes era una foto fija que solo se
+  // tomaba al abrir el mapa o al tocar "centrar". Con watchPosition se
+  // actualiza solo mientras el GPS está activo, siguiendo al usuario en
+  // tiempo real (sin recentrar el mapa en cada actualización, para no
+  // pelear con el usuario si está paneando/zoomeando manualmente).
+  private async iniciarSeguimientoUbicacion() {
+    try {
+      this.watchIdUbicacion = await Geolocation.watchPosition(
+        { enableHighAccuracy: this.gpsAlta },
+        pos => {
+          if (!pos) return;
+          this.zone.run(() => this.actualizarMiUbicacion(pos.coords.latitude, pos.coords.longitude));
+        },
+      );
+    } catch { console.warn('No se pudo iniciar el seguimiento de ubicación'); }
+  }
+
+  private actualizarMiUbicacion(lat: number, lng: number) {
+    if (this.miUbicacionMark) {
+      this.miUbicacionMark.setLatLng([lat, lng]);
+    } else {
+      this.miUbicacionMark = L.marker([lat, lng], { icon: this.miPosIcon })
+        .addTo(this.map)
+        .bindPopup('<strong>📍 Tu ubicación</strong>');
+    }
+  }
 
   // ─────────────────────────────────────────────────────────
   // RUTAS — dibuja las rutas de recolección del backend
@@ -358,6 +450,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
     [this.markerA, this.markerB, this.lineaRuta].forEach(l => { if (l) this.map.removeLayer(l); });
     this.markerA = this.markerB = this.lineaRuta = null;
     this.puntoA = this.puntoB = null; this.distanciaRuta = '';
+    this.geoRutaTrazada = null; this.nombreRutaTrazada = '';
   }
 
   onMapClick(e: L.LeafletMouseEvent) { if (this.modoTrazarRuta) this.manejarClickAB(e.latlng); }
@@ -384,7 +477,8 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
       const data = await (await fetch(url)).json();
 
       if (data.routes?.length) {
-        const coords: [number,number][] = data.routes[0].geometry.coordinates.map((c: number[]) => [c[1], c[0]]);
+        const geoCoords: [number,number][] = data.routes[0].geometry.coordinates; // [lon,lat], formato GeoJSON
+        const coords: [number,number][] = geoCoords.map((c: number[]) => [c[1], c[0]]);
         const dist = (data.routes[0].distance / 1000).toFixed(1);
         const mins = Math.round(data.routes[0].duration / 60);
         this.distanciaRuta = `${dist} km · ${mins} min`;
@@ -396,6 +490,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
         this.lineaRuta = L.polyline(coords, { color: '#E91E63', weight: 5, opacity: 0.9, lineJoin: 'round' }).addTo(this.map);
         this.map.flyToBounds(this.lineaRuta.getBounds(), { padding: [40, 40], animate: true, duration: 1 });
         this.lineaRuta.bindPopup(`🗺 ${this.distanciaRuta}`).openPopup();
+        this.geoRutaTrazada = geoCoords;
       }
     } catch {
       if (this.puntoA && this.puntoB) {
@@ -407,9 +502,38 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
           [[this.puntoA.lat, this.puntoA.lng], [this.puntoB.lat, this.puntoB.lng]],
           { color: '#E91E63', weight: 5, dashArray: '10 6' },
         ).addTo(this.map);
+        this.geoRutaTrazada = [[this.puntoA.lng, this.puntoA.lat], [this.puntoB.lng, this.puntoB.lat]];
       }
     }
     this.cdr.detectChanges();
+  }
+
+  // Guarda la ruta A→B trazada como una ruta real del sistema (misma API
+  // que usan las rutas predefinidas), para que quede disponible en el
+  // selector de rutas del conductor. Antes esta ruta se perdía al cerrar
+  // o al tocar "×" — no había forma de conservarla.
+  async guardarRutaTrazada() {
+    if (!this.geoRutaTrazada || !this.nombreRutaTrazada.trim()) return;
+    this.guardandoRutaTrazada = true;
+    try {
+      await firstValueFrom(this.rutasService.createRuta({
+        perfil_id:   environment.perfilUrl,
+        nombre_ruta: this.nombreRutaTrazada.trim(),
+        shape: JSON.stringify({ type: 'LineString', coordinates: this.geoRutaTrazada }),
+      }));
+      await this.mostrarToast(`✅ Ruta "${this.nombreRutaTrazada.trim()}" guardada`, 'success');
+      this.limpiarRutaAB();
+    } catch (e) {
+      console.error('Error guardando ruta trazada:', e);
+      await this.mostrarToast('No se pudo guardar la ruta', 'danger');
+    } finally {
+      this.guardandoRutaTrazada = false;
+    }
+  }
+
+  private async mostrarToast(message: string, color: 'success' | 'danger') {
+    const t = await this.toastCtrl.create({ message, color, duration: 2500, position: 'top' });
+    await t.present();
   }
 
   private mostrarConfirmacionRuta(dist: string, mins: string): Promise<boolean> {
@@ -430,8 +554,15 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
           </div>
         </div>`;
       document.body.appendChild(div);
-      div.querySelector('#btnIniciar')!.addEventListener('click', () => { document.body.removeChild(div); resolve(true); });
-      div.querySelector('#btnCancelar')!.addEventListener('click', () => { document.body.removeChild(div); resolve(false); });
+      this.confirmacionRutaEl = div;
+
+      const cerrar = (resultado: boolean) => {
+        if (div.parentNode) div.parentNode.removeChild(div);
+        if (this.confirmacionRutaEl === div) this.confirmacionRutaEl = null;
+        resolve(resultado);
+      };
+      div.querySelector('#btnIniciar')!.addEventListener('click', () => cerrar(true));
+      div.querySelector('#btnCancelar')!.addEventListener('click', () => cerrar(false));
     });
   }
 
@@ -440,7 +571,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   // ─────────────────────────────────────────────────────────
   async mostrarETA() {
     if (!this.camionMarker) return;
-    const pos    = await Geolocation.getCurrentPosition();
+    const pos    = await Geolocation.getCurrentPosition({ enableHighAccuracy: this.gpsAlta });
     const uLat   = pos.coords.latitude, uLng = pos.coords.longitude;
     const camion = this.camionMarker.getLatLng();
     const distKm = this.map.distance([uLat, uLng], camion) / 1000;
@@ -467,7 +598,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   // RADIO COBERTURA (ciudadano)
   // ─────────────────────────────────────────────────────────
   async mostrarRadioCobertura() {
-    const pos = await Geolocation.getCurrentPosition();
+    const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: this.gpsAlta });
     if (this.radioCercano) this.map.removeLayer(this.radioCercano);
     this.radioCercano = L.circle([pos.coords.latitude, pos.coords.longitude], {
       radius: 500, color: '#378ADD', fillColor: '#378ADD', fillOpacity: 0.1, weight: 2,
@@ -479,7 +610,7 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   // RUTA MÁS CERCANA (ciudadano)
   // ─────────────────────────────────────────────────────────
   async irARutaMasCercana() {
-    const pos = await Geolocation.getCurrentPosition();
+    const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: this.gpsAlta });
     const lat = pos.coords.latitude, lng = pos.coords.longitude;
     let dMin = Infinity; let punto: [number,number] | null = null;
     this.rutas.forEach(r => {
@@ -499,13 +630,19 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
   // ─────────────────────────────────────────────────────────
   // MARCADO DE RUTA (ciudadano dibuja su recorrido)
   // ─────────────────────────────────────────────────────────
+  // Handler con referencia estable: activarMarcadoRuta() puede llamarse
+  // varias veces (el ciudadano puede tocar el FAB más de una vez) y sin
+  // quitar el listener previo, cada clic en el mapa disparaba N veces.
+  private readonly _onClickMarcadoRuta = (e: L.LeafletMouseEvent) => {
+    this.rutaCiudadano.push([e.latlng.lat, e.latlng.lng]);
+    L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.map);
+    if (this.lineaCiudadano) this.map.removeLayer(this.lineaCiudadano);
+    this.lineaCiudadano = L.polyline(this.rutaCiudadano, { color: '#E91E63', weight: 4 }).addTo(this.map);
+  };
+
   activarMarcadoRuta() {
-    this.map.on('click', (e: L.LeafletMouseEvent) => {
-      this.rutaCiudadano.push([e.latlng.lat, e.latlng.lng]);
-      L.marker([e.latlng.lat, e.latlng.lng]).addTo(this.map);
-      if (this.lineaCiudadano) this.map.removeLayer(this.lineaCiudadano);
-      this.lineaCiudadano = L.polyline(this.rutaCiudadano, { color: '#E91E63', weight: 4 }).addTo(this.map);
-    });
+    this.map.off('click', this._onClickMarcadoRuta);
+    this.map.on('click', this._onClickMarcadoRuta);
   }
 
   async guardarRutaCiudadano() {
@@ -518,5 +655,10 @@ export class MapViewComponent implements AfterViewInit, OnDestroy {
     this.rutaCiudadano = JSON.parse(value);
     if (this.rutaCiudadano.length)
       this.lineaCiudadano = L.polyline(this.rutaCiudadano, { color: '#E91E63' }).addTo(this.map);
+  }
+
+  // Distancia total del HUD conductor, en la unidad elegida en Configuración.
+  get distanciaTotalStr(): string {
+    return this.prefsService.convertirDistancia(this.distanciaTotal, this.unidadDistancia).toFixed(2);
   }
 }

@@ -1,73 +1,82 @@
-<div class="vehiculos-container">
+<ion-header>
+  <ion-toolbar style="--background:#e91e63;--color:white">
+    <ion-buttons slot="start">
+      <ion-button (click)="volverLista()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Registrar vehículo</ion-title>
+  </ion-toolbar>
+</ion-header>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div>
-      <h2 class="titulo">Registrar Vehículo</h2>
-      <p class="subtitulo">Completa la información para añadir un nuevo vehículo al sistema</p>
+<ion-content class="veh-content">
+
+  <div class="vehiculos-container">
+
+    <p class="subtitulo">Completa la información para añadir un nuevo vehículo al sistema</p>
+
+    <!-- CARD FORMULARIO -->
+    <div class="card form-card">
+      <form class="form">
+
+        <div class="form-grid">
+
+          <!-- PLACA -->
+          <label class="floating">
+            <input
+              type="text"
+              placeholder=" "
+              id="placa"
+              name="placa"
+              [(ngModel)]="datos.placa"
+              required>
+            <span>Placa</span>
+          </label>
+
+          <!-- MARCA -->
+          <label class="floating">
+            <input
+              type="text"
+              placeholder=" "
+              id="marca"
+              name="marca"
+              [(ngModel)]="datos.marca">
+            <span>Marca</span>
+          </label>
+
+          <!-- MODELO -->
+          <label class="floating">
+            <input
+              type="text"
+              placeholder=" "
+              id="modelo"
+              name="modelo"
+              [(ngModel)]="datos.modelo">
+            <span>Modelo</span>
+          </label>
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn primary"
+            (click)="registroVehiculo()">
+            Registrar vehículo
+          </button>
+
+          <button
+            type="button"
+            class="btn secondary"
+            (click)="volverLista()">
+            Volver a la lista
+          </button>
+        </div>
+
+      </form>
     </div>
-  </div>
 
-  <!-- CARD FORMULARIO -->
-  <div class="card form-card">
-    <form class="form">
-
-      <div class="form-grid">
-
-        <!-- PLACA -->
-        <label class="floating">
-          <input 
-            type="text"
-            placeholder=" "
-            id="placa"
-            name="placa"
-            [(ngModel)]="datos.placa"
-            required>
-          <span>Placa</span>
-        </label>
-
-        <!-- MARCA -->
-        <label class="floating">
-          <input 
-            type="text"
-            placeholder=" "
-            id="marca"
-            name="marca"
-            [(ngModel)]="datos.marca">
-          <span>Marca</span>
-        </label>
-
-        <!-- MODELO -->
-        <label class="floating">
-          <input 
-            type="text"
-            placeholder=" "
-            id="modelo"
-            name="modelo"
-            [(ngModel)]="datos.modelo">
-          <span>Modelo</span>
-        </label>
-
-      </div>
-
-      <!-- BOTONES -->
-      <div class="form-actions">
-        <button 
-          type="button" 
-          class="btn primary"
-          (click)="registroVehiculo()">
-          Registrar Vehículo
-        </button>
-
-        <button 
-          type="button" 
-          class="btn secondary"
-          (click)="volverLista()">
-          Volver a la Lista
-        </button>
-      </div>
-
-    </form>
   </div>
 
   <!-- MODAL ÉXITO -->
@@ -88,4 +97,4 @@
     </div>
   </div>
 
-</div>
+</ion-content>

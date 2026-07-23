@@ -3,11 +3,12 @@ import { VehiculosService } from '../../services/vehiculos/vehiculos';
 import { Vehiculo } from '../../../interfaces/Vehiculo';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule, HttpClientModule, IonicModule],
   selector: 'app-vehiculos-lista',
   templateUrl: './vehiculos-lista.html',
   styleUrls: ['./vehiculos-lista.css']
@@ -36,7 +37,7 @@ export class VehiculosListaComponent implements OnInit {
       next: (data) => {
         // Aseguramos que Angular detecte cambios
         this.ngZone.run(() => {
-          this.vehiculos = data.data || [];
+          this.vehiculos = data || [];
           this.cargando = false;
           this.error = null;
         });
@@ -48,6 +49,10 @@ export class VehiculosListaComponent implements OnInit {
         });
       }
     });
+  }
+
+  volver() {
+    this.router.navigate(['/menu']);
   }
 
   crearVehiculo() {

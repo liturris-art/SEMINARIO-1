@@ -50,14 +50,6 @@
         <ion-note *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" color="danger">
           Mínimo 8 caracteres
         </ion-note>
-        <ion-item class="input-item">
-          <ion-icon name="people-outline" slot="start"></ion-icon>
-          <ion-select label="Tipo de usuario" label-placement="floating" formControlName="rol">
-            <ion-select-option value="ciudadano">👤 Ciudadano</ion-select-option>
-            <ion-select-option value="conductor">🚛 Conductor</ion-select-option>
-          </ion-select>
-        </ion-item>
-
         <div class="aviso-conductor" *ngIf="esConductor">
           <ion-icon name="scan-outline"></ion-icon>
           <span>Como conductor registrarás tu rostro con MediaPipe para verificación en cada recorrido</span>
@@ -90,13 +82,9 @@
     <!-- Preview -->
     <div class="foto-preview" *ngIf="fotoPreview">
       <img [src]="fotoPreview" alt="Foto de referencia" />
-      <div class="foto-overlay" *ngIf="procesando">
-        <ion-spinner name="crescent"></ion-spinner>
-        <span>Analizando con MediaPipe...</span>
-      </div>
-      <div class="foto-ok" *ngIf="descriptorOk && !procesando">
+      <div class="foto-ok" *ngIf="descriptorOk">
         <ion-icon name="checkmark-circle-outline"></ion-icon>
-        <span>468 landmarks detectados ✅</span>
+        <span>Rostro registrado ✅</span>
       </div>
     </div>
 
@@ -116,8 +104,8 @@
     </div>
 
     <ion-button expand="block" color="primary" class="foto-btn"
-      [disabled]="procesando || cargandoModelo"
-      (click)="tomarFoto()">
+      [disabled]="cargandoModelo"
+      (click)="abrirEscaneo()">
       <ion-icon name="camera-outline" slot="start"></ion-icon>
       {{ fotoPreview ? 'Repetir foto' : 'Abrir cámara' }}
     </ion-button>
@@ -139,5 +127,12 @@
     <p>Redirigiendo al inicio de sesión...</p>
     <ion-spinner name="dots" color="success"></ion-spinner>
   </div>
+
+  <app-face-scan
+    *ngIf="mostrarScan"
+    titulo="Registra tu rostro"
+    (capturado)="onRostroCapturado($event)"
+    (cancelado)="cancelarEscaneo()">
+  </app-face-scan>
 
 </ion-content>

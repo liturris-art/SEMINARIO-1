@@ -8,13 +8,13 @@ import { Router, RouterLink } from '@angular/router';
 import {
   IonContent, IonHeader, IonTitle, IonToolbar,
   IonButtons, IonButton,
-  IonItem, IonInput, IonSelect, IonSelectOption,
+  IonItem, IonInput,
   IonIcon, IonSpinner, IonNote,
   ToastController,
 } from '@ionic/angular/standalone';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { AuthService } from '../../services/auth.service';
 import { FaceRecognitionService } from '../../services/face-recognition.service';
+import { FaceScanComponent } from '../../components/face-scan/face-scan.component';
 
 type Paso = 'datos' | 'foto' | 'listo';
 
@@ -26,9 +26,10 @@ type Paso = 'datos' | 'foto' | 'listo';
   imports: [
     IonContent, IonHeader, IonTitle, IonToolbar,
     IonButtons, IonButton,
-    IonItem, IonInput, IonSelect, IonSelectOption,
+    IonItem, IonInput,
     IonIcon, IonSpinner, IonNote,
     CommonModule, FormsModule, ReactiveFormsModule, RouterLink,
+    FaceScanComponent,
   ],
 })
 export class RegisterPage {
@@ -39,9 +40,9 @@ export class RegisterPage {
 
   // Foto de referencia
   fotoPreview:    string | null = null;
-  procesando      = false;
   descriptorOk    = false;
   cargandoModelo  = false;
+  mostrarScan     = false;
 
   constructor(
     private auth:        AuthService,
@@ -56,7 +57,10 @@ export class RegisterPage {
       telefono:  ['', Validators.required],
       email:     ['', [Validators.required, Validators.email]],
       password:  ['', [Validators.required, Validators.minLength(8)]],
-      rol:       ['', Validators.required],
+      // El registro es solo para conductores — el rol ciudadano se
+      // accede de forma anónima ("Ver mapa como ciudadano" en login),
+      // nunca necesita crear cuenta.
+      rol:       ['conductor', Validators.required],
     });
   }
 
@@ -91,41 +95,23 @@ export class RegisterPage {
   }
 
   // ── Paso 2: foto ─────────────────────────────────────────
-  async tomarFoto() {
+  // La captura ya no usa Camera.getPhoto() (cámara nativa del sistema,
+  // sin forma de guiar el encuadre) — FaceScanComponent muestra la cámara
+  // en vivo dentro de la app y solo emite el resultado cuando el encuadre
+  // ya fue bueno y MediaPipe ya extrajo los landmarks con éxito.
+  abrirEscaneo() { this.mostrarScan = true; }
+  cancelarEscaneo() { this.mostrarScan = false; }
+
+  async onRostroCapturado(resultado: { base64: string; landmarks: number[] }) {
+    this.mostrarScan  = false;
+    this.fotoPreview  = resultado.base64;
+    this.descriptorOk = false;
     try {
-      const foto = await Camera.getPhoto({
-        quality:       90,
-        resultType:    CameraResultType.Base64,
-        source:        CameraSource.Camera,
-        saveToGallery: false,
-      });
-
-      if (!foto.base64String) return;
-
-      this.fotoPreview  = `data:image/jpeg;base64,${foto.base64String}`;
-      this.procesando   = true;
-      this.descriptorOk = false;
-
-      this.showToast('⏳ Analizando rostro con MediaPipe...', 'warning');
-
-      // Extraer landmarks con MediaPipe
-      const landmarks = await this.faceService.extraerLandmarks(foto.base64String);
-
-      this.procesando = false;
-
-      if (!landmarks) {
-        this.fotoPreview = null;
-        this.showToast('❌ No se detectó rostro. Mira de frente con buena luz.', 'danger');
-        return;
-      }
-
-      await this.faceService.guardarDescriptorReferencia(landmarks);
+      await this.faceService.guardarDescriptorReferencia(resultado.landmarks);
       this.descriptorOk = true;
-      this.showToast(`✅ Rostro registrado — ${landmarks.length / 3} landmarks detectados`, 'success');
-
+      this.showToast(`✅ Rostro registrado — ${resultado.landmarks.length / 3} landmarks detectados`, 'success');
     } catch {
-      this.procesando = false;
-      this.showToast('Cámara cancelada', 'warning');
+      this.showToast('No se pudo guardar el rostro. Intenta de nuevo.', 'danger');
     }
   }
 

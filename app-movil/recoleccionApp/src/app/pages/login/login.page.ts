@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormsModule,
@@ -39,10 +39,11 @@ import { AppUser, UserMetadata } from '../../../interfaces/user';
     CommonModule, FormsModule, ReactiveFormsModule,
   ],
 })
-export class LoginPage implements OnInit {
+export class LoginPage implements OnInit, OnDestroy {
 
   loginForm: FormGroup;
   isLoading = false;
+  loginExitoso = false;   // breve estado de "listo" antes de navegar, para no cortar en seco
   biometricAvailable = false;
   showPassword = false;   // ✅ toggle visibilidad contraseña
 
@@ -68,6 +69,24 @@ export class LoginPage implements OnInit {
 
   async ngOnInit() {
     this.biometricAvailable = await this.biometricService.isAvailable();
+  }
+
+  // Ionic mantiene las páginas vivas en el DOM (ion-router-outlet) para las
+  // transiciones — ngOnInit no se repite al volver a /login (p. ej. tras
+  // cerrar sesión), así que sin esto el formulario y el estado "¡Listo!"
+  // de un login anterior se quedaban ahí. ionViewWillEnter sí se dispara
+  // cada vez que la página vuelve a mostrarse, esté recién creada o no.
+  ionViewWillEnter() {
+    this.loginForm.reset();
+    this.loginExitoso = false;
+    this.isLoading    = false;
+    this.showPassword = false;
+    // isBlocked/loginAttempts/blockTimer NO se reinician: si la cuenta
+    // sigue bloqueada, debe seguir estándolo aunque se vuelva a esta página.
+  }
+
+  ngOnDestroy() {
+    if (this.blockTimer) clearInterval(this.blockTimer);
   }
 
   async login() {
@@ -103,6 +122,12 @@ export class LoginPage implements OnInit {
 
       this.loginAttempts = 0;
       this.showToast('¡Sesión iniciada correctamente!', 'success');
+
+      // Pausa breve mostrando el check de "listo" antes de navegar — sin
+      // esto, el toast apenas alcanzaba a aparecer y la navegación se
+      // sentía como un corte en seco en vez de una transición.
+      this.loginExitoso = true;
+      await new Promise(resolve => setTimeout(resolve, 550));
 
       if (rol === 'conductor') {
         this.router.navigate(['/menu']);

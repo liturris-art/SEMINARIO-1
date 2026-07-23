@@ -97,6 +97,10 @@
           <span><ion-icon name="time-outline"></ion-icon> Tiempo promedio</span>
           <strong>{{ duracionStr(stats.tiempoPromedioMin) }}</strong>
         </div>
+        <div class="res-fila" *ngIf="stats.suspendidos > 0">
+          <span><ion-icon name="alert-circle-outline"></ion-icon> Suspendidos (superaron el tiempo límite)</span>
+          <strong>{{ stats.suspendidos }}</strong>
+        </div>
       </div>
     </div>
 

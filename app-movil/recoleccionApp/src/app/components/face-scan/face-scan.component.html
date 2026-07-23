@@ -1,0 +1,64 @@
+<div class="scan-overlay">
+
+  <div class="scan-header">
+    <h2>{{ titulo }}</h2>
+    <button class="scan-cerrar" (click)="cancelar()" aria-label="Cancelar">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+  </div>
+
+  <div class="scan-video-wrap">
+    <video #video autoplay playsinline muted class="scan-video"></video>
+
+    <!-- Mientras getUserMedia/video.play() no resuelven, en vez de pantalla
+         negra se ve un indicador de carga. -->
+    <div class="scan-cargando" *ngIf="!camaraLista && estado !== 'error'">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Abriendo cámara...</span>
+    </div>
+
+    <!-- Oscurece todo menos el óvalo central -->
+    <svg class="scan-mask" viewBox="0 0 100 100" preserveAspectRatio="none" *ngIf="camaraLista">
+      <defs>
+        <mask id="ovalMask">
+          <rect width="100" height="100" fill="white" />
+          <ellipse cx="50" cy="44" rx="30" ry="36" fill="black" />
+        </mask>
+      </defs>
+      <rect width="100" height="100" fill="rgba(0,0,0,0.6)" mask="url(#ovalMask)" />
+    </svg>
+
+    <div class="scan-ovalo"
+      *ngIf="camaraLista"
+      [class.ovalo-buscando]="estado === 'buscando' || estado === 'error'"
+      [class.ovalo-alerta]="estado === 'poca-luz' || estado === 'muy-cerca' || estado === 'muy-lejos' || estado === 'descentrado'"
+      [class.ovalo-listo]="estado === 'listo' || estado === 'capturando'">
+
+      <svg class="progreso-anillo" viewBox="0 0 120 120" *ngIf="estado === 'listo'">
+        <circle cx="60" cy="60" r="54" class="anillo-fondo"></circle>
+        <circle cx="60" cy="60" r="54" class="anillo-progreso"
+          [style.stroke-dashoffset]="339.3 - (339.3 * progreso / 100)"></circle>
+      </svg>
+
+      <ion-spinner *ngIf="estado === 'capturando'" name="crescent" class="scan-spinner"></ion-spinner>
+    </div>
+  </div>
+
+  <div class="scan-mensaje" [class.mensaje-listo]="estado === 'listo'" [class.mensaje-error]="estado === 'error'">
+    <ion-icon *ngIf="estado === 'buscando'" name="scan-outline"></ion-icon>
+    <ion-icon *ngIf="estado === 'poca-luz'" name="sunny-outline"></ion-icon>
+    <ion-icon *ngIf="estado === 'muy-cerca' || estado === 'muy-lejos'" name="resize-outline"></ion-icon>
+    <ion-icon *ngIf="estado === 'descentrado'" name="locate-outline"></ion-icon>
+    <ion-icon *ngIf="estado === 'listo' || estado === 'capturando'" name="checkmark-circle-outline"></ion-icon>
+    <ion-icon *ngIf="estado === 'error'" name="alert-circle-outline"></ion-icon>
+    <span>{{ mensaje }}</span>
+  </div>
+
+  <button class="scan-btn-manual" *ngIf="estado === 'listo'" [disabled]="capturandoFoto" (click)="capturarManual()">
+    <ion-icon name="camera-outline"></ion-icon>
+    Capturar ahora
+  </button>
+
+  <p class="scan-tip" *ngIf="estado !== 'error'">Mira de frente, con buena luz y sin lentes ni gorra</p>
+
+</div>

@@ -35,8 +35,17 @@
     </app-map-view>
   </div>
 
-  <!-- HUD GPS en vivo -->
-  <div class="gps-hud" *ngIf="tracking">
+  <!-- HUD GPS en vivo — arrastrable, ver agarrarHud/moverHud/soltarHud -->
+  <div class="gps-hud"
+    #gpsHud
+    *ngIf="tracking"
+    [class.gps-hud-libre]="hudPos"
+    [class.gps-hud-arrastrando]="hudArrastrando"
+    [style.left.px]="hudPos?.x"
+    [style.top.px]="hudPos?.y"
+    (touchstart)="agarrarHud($event, gpsHud)" (touchmove)="moverHud($event)" (touchend)="soltarHud()"
+    (mousedown)="agarrarHud($event, gpsHud)">
+    <ion-icon name="move-outline" class="gps-drag-handle"></ion-icon>
     <div class="gps-item">
       <ion-icon name="navigate-outline"></ion-icon>
       <div>
@@ -49,7 +58,7 @@
       <ion-icon name="footsteps-outline"></ion-icon>
       <div>
         <span class="gps-val">{{ distStr }}</span>
-        <span class="gps-lbl">km</span>
+        <span class="gps-lbl">{{ unidadDistancia }}</span>
       </div>
     </div>
     <div class="gps-sep"></div>
@@ -92,12 +101,17 @@
           </div>
           <div class="paso-content">
             <span class="paso-label">Vehículo</span>
-            <ion-select *ngIf="pasoActual === 1" placeholder="Seleccionar vehículo"
-              [(ngModel)]="vehiculoSeleccionado" (ionChange)="onVehiculoChange()" class="paso-select">
-              <ion-select-option *ngFor="let v of vehiculos" [value]="v">
+            <!-- No se usa ion-select: su shadow DOM no se renderiza en el
+                 WebView nativo de Android (mismo problema ya resuelto en
+                 Configuración) — un <select> nativo sí funciona igual en
+                 ambos lados. -->
+            <select *ngIf="pasoActual === 1" class="paso-select-native"
+              [(ngModel)]="vehiculoSeleccionado" (ngModelChange)="onVehiculoChange()">
+              <option [ngValue]="null" disabled selected>Seleccionar vehículo</option>
+              <option *ngFor="let v of vehiculos" [ngValue]="v">
                 {{ v.placa }} · {{ v.marca }} {{ v.modelo }}
-              </ion-select-option>
-            </ion-select>
+              </option>
+            </select>
             <span class="paso-resumen" *ngIf="vehiculoSeleccionado">
               {{ vehiculoSeleccionado.placa }} · {{ vehiculoSeleccionado.marca }}
             </span>
@@ -112,12 +126,13 @@
           </div>
           <div class="paso-content">
             <span class="paso-label">Ruta asignada</span>
-            <ion-select *ngIf="pasoActual === 2" placeholder="Seleccionar ruta"
-              [(ngModel)]="rutaSeleccionada" (ionChange)="onRutaChange()" class="paso-select">
-              <ion-select-option *ngFor="let r of rutas" [value]="r">
+            <select *ngIf="pasoActual === 2" class="paso-select-native"
+              [(ngModel)]="rutaSeleccionada" (ngModelChange)="onRutaChange()">
+              <option [ngValue]="null" disabled selected>Seleccionar ruta</option>
+              <option *ngFor="let r of rutas" [ngValue]="r">
                 {{ r.nombre_ruta }}
-              </ion-select-option>
-            </ion-select>
+              </option>
+            </select>
             <!-- Botón guardar ruta en mapa + historial -->
             <div class="paso-guardar-ruta" *ngIf="rutaSeleccionada">
               <ion-button size="small"
@@ -157,10 +172,11 @@
         <!-- Paso 4: Iniciar -->
         <div class="paso-card paso-iniciar" [class.paso-active]="pasoActual === 4">
           <ion-button expand="block" color="success" class="btn-iniciar"
-            [disabled]="!pasoCompletado(1) || !pasoCompletado(2) || !pasoCompletado(3)"
-            (click)="iniciarRecorrido()">
-            <ion-icon name="play-circle-outline" slot="start"></ion-icon>
-            Iniciar recorrido
+            [disabled]="!pasoCompletado(1) || !pasoCompletado(2) || !pasoCompletado(3) || iniciandoRecorrido"
+            (click)="confirmarIniciarRecorrido()">
+            <ion-spinner *ngIf="iniciandoRecorrido" name="crescent" slot="start"></ion-spinner>
+            <ion-icon *ngIf="!iniciandoRecorrido" name="play-circle-outline" slot="start"></ion-icon>
+            {{ iniciandoRecorrido ? 'Iniciando...' : 'Iniciar recorrido' }}
           </ion-button>
         </div>
 
@@ -188,7 +204,7 @@
           </div>
           <div class="va-stat">
             <ion-icon name="footsteps-outline"></ion-icon>
-            <span>{{ distStr }} km</span>
+            <span>{{ distStr }} {{ unidadDistancia }}</span>
           </div>
           <div class="va-stat">
             <ion-icon name="map-outline"></ion-icon>
@@ -197,7 +213,7 @@
         </div>
 
         <ion-button expand="block" color="danger" fill="outline"
-          class="btn-detener" (click)="detenerRecorrido()">
+          class="btn-detener" (click)="confirmarDetenerRecorrido()">
           <ion-icon name="stop-circle-outline" slot="start"></ion-icon>
           Finalizar y guardar recorrido
         </ion-button>
@@ -206,5 +222,41 @@
 
     </div>
   </div>
+
+  <!-- ══ CONFIRMAR INICIO ══════════════════════════════════ -->
+  <div class="confirm-overlay" *ngIf="confirmandoInicio">
+    <div class="confirm-card">
+      <ion-icon name="play-circle-outline" class="confirm-icon confirm-icon-success"></ion-icon>
+      <h3>¿Iniciar recorrido?</h3>
+      <p>
+        Vehículo <strong>{{ vehiculoSeleccionado?.placa }}</strong> ·
+        Ruta <strong>{{ rutaSeleccionada?.nombre_ruta }}</strong>
+      </p>
+      <div class="confirm-btns">
+        <button class="confirm-btn confirm-cancel" (click)="cancelarInicio()">Cancelar</button>
+        <button class="confirm-btn confirm-aceptar" (click)="aceptarIniciarRecorrido()">Iniciar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CONFIRMAR DETENER ═════════════════════════════════ -->
+  <div class="confirm-overlay" *ngIf="confirmandoDetener">
+    <div class="confirm-card">
+      <ion-icon name="stop-circle-outline" class="confirm-icon confirm-icon-danger"></ion-icon>
+      <h3>¿Finalizar recorrido?</h3>
+      <p>Se guardará en el historial con <strong>{{ distStr }} {{ unidadDistancia }}</strong> recorridos.</p>
+      <div class="confirm-btns">
+        <button class="confirm-btn confirm-cancel" (click)="cancelarDetener()">Cancelar</button>
+        <button class="confirm-btn confirm-danger" (click)="aceptarDetenerRecorrido()">Finalizar</button>
+      </div>
+    </div>
+  </div>
+
+  <app-face-scan
+    *ngIf="mostrarScanIdentidad"
+    titulo="Verifica tu identidad"
+    (capturado)="onIdentidadCapturada($event)"
+    (cancelado)="cancelarScanIdentidad()">
+  </app-face-scan>
 
 </ion-content>

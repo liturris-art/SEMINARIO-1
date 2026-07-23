@@ -1,48 +1,27 @@
-/* ===== VARIABLES ===== */
-:root {
-  --verde: #2e7d32;
-  --verde-oscuro: #1b5e20;
-  --verde-focus: rgba(46, 125, 50, 0.18);
-  --gris-texto: #555;
-  --gris-borde: #dcdcdc;
-  --gris-suave: #f5f7f8;
+.veh-content {
+  --background: #f2f4f8;
 }
 
 /* ===== CONTENEDOR GENERAL ===== */
 .vehiculos-container {
-  width: 95%;
-  max-width: 700px;
-  margin: 50px auto;
-  padding: 10px 0 40px;
-  font-family: "Segoe UI", sans-serif;
-}
-
-/* ===== TÍTULO ===== */
-.titulo {
-  text-align: center;
-  font-size: 28px;
-  color: var(--verde);
-  margin-bottom: 8px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  padding: 16px;
+  max-width: 550px;
+  margin: 0 auto;
 }
 
 .subtitulo {
   text-align: center;
   color: #6b6b6b;
   font-size: 14px;
-  margin-bottom: 30px;
+  margin: 0 0 20px;
 }
 
 /* ===== CARD FORMULARIO ===== */
 .form-card {
-  max-width: 550px;
-  margin: auto;
-  padding: 30px 28px;
+  padding: 25px;
   border-radius: 16px;
   background: #ffffff;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-  animation: fadeInUp 0.3s ease;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.06);
 }
 
 /* ===== FORMULARIO ===== */
@@ -62,15 +41,15 @@
   width: 100%;
   padding: 16px 14px;
   border-radius: 10px;
-  border: 1.5px solid var(--gris-borde);
+  border: 1.5px solid #dcdcdc;
   background: #fff;
   font-size: 14px;
   transition: all 0.2s ease;
 }
 
 .floating input:focus {
-  border-color: var(--verde);
-  box-shadow: 0 0 0 3px var(--verde-focus);
+  border-color: #e91e63;
+  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.15);
   outline: none;
 }
 
@@ -86,16 +65,21 @@
   padding: 0 5px;
 }
 
-/* Animación floating */
 .floating input:focus + span,
 .floating input:not(:placeholder-shown) + span {
   top: -8px;
   font-size: 11px;
-  color: var(--verde);
+  color: #e91e63;
   font-weight: 600;
 }
 
 /* ===== BOTONES ===== */
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .btn {
   border: none;
   border-radius: 10px;
@@ -104,33 +88,29 @@
   transition: all 0.25s ease;
 }
 
-/* Botón principal */
 .btn.primary {
   width: 100%;
-  background: var(--verde);
+  background: #e91e63;
   color: white;
   font-size: 15px;
   padding: 14px;
-  letter-spacing: 0.5px;
 }
 
 .btn.primary:hover {
-  background: var(--verde-oscuro);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(27, 94, 32, 0.25);
+  background: #c2185b;
 }
 
-/* Botón secundario */
 .btn.secondary {
   width: 100%;
-  background: #f1f1f1;
-  color: #444;
+  background: #fff;
+  color: #e91e63;
+  border: 1.5px solid #e91e63;
   font-size: 14px;
   padding: 12px;
 }
 
 .btn.secondary:hover {
-  background: #e0e0e0;
+  background: #fce4ec;
 }
 
 /* ===== MODALES ===== */
@@ -138,11 +118,9 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(3px);
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: fadeIn 0.25s ease;
   z-index: 1000;
 }
 
@@ -153,7 +131,6 @@
   padding: 28px;
   border-radius: 16px;
   text-align: center;
-  animation: scaleIn 0.25s ease;
   box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
 }
 
@@ -164,7 +141,7 @@
 }
 
 .modal.success h3 {
-  color: var(--verde);
+  color: #e91e63;
 }
 
 .modal.error h3 {
@@ -173,18 +150,18 @@
 
 .modal p {
   font-size: 14px;
-  color: var(--gris-texto);
+  color: #555;
   margin-bottom: 20px;
 }
 
 .btn.ok {
-  background: var(--verde);
+  background: #e91e63;
   color: white;
   padding: 10px 20px;
 }
 
 .btn.ok:hover {
-  background: var(--verde-oscuro);
+  background: #c2185b;
 }
 
 .btn.cancel {
@@ -195,24 +172,4 @@
 
 .btn.cancel:hover {
   background: #d4d4d4;
-}
-
-/* ===== ANIMACIONES ===== */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-.header-actions button {
-  z-index: 10;
-  pointer-events: auto;
 }

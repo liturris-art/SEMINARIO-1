@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
 import { VehiculosService } from '../../services/vehiculos/vehiculos';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Vehiculo } from '../../../interfaces/Vehiculo';
 
 @Component({
   selector: 'app-vehiculos-actualizacion',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IonicModule],
   templateUrl: './vehiculos-actualizacion.html',
   styleUrl: './vehiculos-actualizacion.css'
 })
@@ -40,6 +41,10 @@ export class VehiculosActualizacion implements OnInit {
   }
   
   modalVisible = false;
+
+  volver() {
+    this.router.navigate(['/vehiculos']);
+  }
 
 actualizarVehiculo() {
   if (!this.vehiculo.id) return;

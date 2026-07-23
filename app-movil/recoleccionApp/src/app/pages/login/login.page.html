@@ -58,10 +58,12 @@
       expand="block"
       type="submit"
       [disabled]="loginForm.invalid || isLoading || isBlocked"
-      class="login-btn">
-      <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
-      <ion-icon *ngIf="!isLoading" name="log-in-outline" slot="start"></ion-icon>
-      {{ isLoading ? 'Ingresando...' : 'Iniciar sesión' }}
+      class="login-btn"
+      [class.login-btn-success]="loginExitoso">
+      <ion-spinner *ngIf="isLoading && !loginExitoso" slot="start"></ion-spinner>
+      <ion-icon *ngIf="loginExitoso" name="checkmark-circle-outline" slot="start"></ion-icon>
+      <ion-icon *ngIf="!isLoading && !loginExitoso" name="log-in-outline" slot="start"></ion-icon>
+      {{ loginExitoso ? '¡Listo!' : (isLoading ? 'Ingresando...' : 'Iniciar sesión') }}
     </ion-button>
 
     <!-- Botones extra -->
@@ -85,16 +87,15 @@
       </ion-button>
     </div>
 
+    <!-- FIX #4: acceso sin login para ciudadanos -->
+    <div class="ciudadano-access">
+      <p>¿Solo quieres ver las rutas?</p>
+      <ion-button expand="block" fill="outline" (click)="entrarComoCiudadano()" class="ciudadano-btn">
+        <ion-icon name="map-outline" slot="start"></ion-icon>
+        Ver mapa como ciudadano
+      </ion-button>
+    </div>
+
   </form>
-
-
-  <!-- FIX #4: acceso sin login para ciudadanos -->
-  <div class="ciudadano-access">
-    <p>¿Solo quieres ver las rutas?</p>
-    <ion-button expand="block" fill="outline" color="medium" (click)="entrarComoCiudadano()">
-      <ion-icon name="map-outline" slot="start"></ion-icon>
-      Ver mapa como ciudadano
-    </ion-button>
-  </div>
 
 </ion-content>

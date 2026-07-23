@@ -1,90 +1,101 @@
-<div class="vehiculos-container">
+<ion-header>
+  <ion-toolbar style="--background:#e91e63;--color:white">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()">
+        <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Vehículos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="obtenerVehiculos()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 
-  <!-- ENCABEZADO -->
-  <div class="header">
-    <div>
-      <h2 class="titulo">Gestión de Vehículos</h2>
-      <p class="subtitulo">Administra los vehículos registrados en el sistema</p>
-    </div>
+<ion-content class="veh-content">
 
+  <div class="vehiculos-container">
+
+    <!-- ACCIONES -->
     <div class="header-actions">
       <button class="btn primary" (click)="crearVehiculo()">
-        + Nuevo Vehículo
-      </button>
-      <button class="btn secondary" (click)="obtenerVehiculos()">
-        Recargar
+        <ion-icon name="add-outline"></ion-icon> Nuevo vehículo
       </button>
       <button class="btn secondary" (click)="gotoRutas()">
-        Ver Rutas
+        <ion-icon name="map-outline"></ion-icon> Ver rutas
       </button>
     </div>
-  </div>
 
-  <!-- ESTADO DE CARGA -->
-  <div *ngIf="cargando" class="alert info">
-    Cargando vehículos...
-  </div>
+    <!-- ESTADO DE CARGA -->
+    <div *ngIf="cargando" class="estado-center">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Cargando vehículos...</p>
+    </div>
 
-  <!-- ERROR -->
-  <div *ngIf="error" class="alert error">
-    {{ error }}
-  </div>
+    <!-- ERROR -->
+    <div *ngIf="error" class="alert error">
+      {{ error }}
+    </div>
 
-  <!-- TABLA -->
-  <div class="card" *ngIf="!cargando && !error">
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Placa</th>
-          <th>Marca</th>
-          <th>Modelo</th>
-          <th>Estado</th>
-          <th class="acciones-col">Acciones</th>
-        </tr>
-      </thead>
+    <!-- LISTA -->
+    <div class="card" *ngIf="!cargando && !error">
 
-      <tbody>
-        <tr *ngFor="let v of vehiculos">
-          <td>{{ v.id }}</td>
-          <td class="placa">{{ v.placa }}</td>
-          <td>{{ v.marca }}</td>
-          <td>{{ v.modelo }}</td>
+      <div class="tabla-scroll">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>Marca</th>
+              <th>Modelo</th>
+              <th>Estado</th>
+              <th class="acciones-col">Acciones</th>
+            </tr>
+          </thead>
 
-          <td>
-            <span 
-              class="tag"
-              [class.activo]="v.activo"
-              [class.inactivo]="!v.activo">
-              {{ v.activo ? 'Activo' : 'Inactivo' }}
-            </span>
-          </td>
+          <tbody>
+            <tr *ngFor="let v of vehiculos">
+              <td class="placa">{{ v.placa }}</td>
+              <td>{{ v.marca }}</td>
+              <td>{{ v.modelo }}</td>
 
-          <td class="acciones">
-            <button class="btn edit" (click)="actualizarVehiculo(v.id)">
-              Editar
-            </button>
-            <button class="btn delete" (click)="eliminarVehiculo(v.id!)">
-              Eliminar
-            </button>
-          </td>
-        </tr>
+              <td>
+                <span
+                  class="tag"
+                  [class.activo]="v.activo"
+                  [class.inactivo]="!v.activo">
+                  {{ v.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
 
-        <!-- Estado vacío -->
-        <tr *ngIf="vehiculos.length === 0">
-          <td colspan="6" class="empty">
-            No hay vehículos registrados.
-          </td>
-        </tr>
+              <td class="acciones">
+                <button class="icon-btn edit" (click)="actualizarVehiculo(v.id)" title="Editar">
+                  <ion-icon name="create-outline"></ion-icon>
+                </button>
+                <button class="icon-btn delete" (click)="eliminarVehiculo(v.id!)" title="Eliminar">
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      </tbody>
-    </table>
+      <!-- Estado vacío -->
+      <div *ngIf="vehiculos.length === 0" class="estado-center">
+        <ion-icon name="car-outline" class="estado-icon"></ion-icon>
+        <p>No hay vehículos registrados.</p>
+      </div>
+
+    </div>
+
   </div>
 
   <!-- MODAL CONFIRMACIÓN -->
   <div class="modal-overlay" *ngIf="modalConfirmVisible">
     <div class="modal">
-      <h3>Confirmar Eliminación</h3>
+      <h3>Confirmar eliminación</h3>
       <p>¿Estás seguro de eliminar este vehículo? Esta acción no se puede deshacer.</p>
 
       <div class="modal-btns">
@@ -103,4 +114,4 @@
     </div>
   </div>
 
-</div>
+</ion-content>

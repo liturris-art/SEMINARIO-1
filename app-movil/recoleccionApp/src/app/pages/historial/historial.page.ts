@@ -28,17 +28,19 @@ export class HistorialPage implements OnInit {
   async cargar() {
     this.cargando = true;
     this.error    = false;
+    // Supabase es la fuente principal: tiene nombre_ruta, placa,
+    // distancia_km y el estado 'programada' que el API del docente no
+    // expone. El API (/misrecorridos) queda como respaldo por si
+    // Supabase no responde, aunque con menos detalle.
     try {
-      const res = await firstValueFrom(this.recorridosService.getRecorridos());
-      // FIX #7: la API devuelve data directamente o en .data
-      this.recorridos = Array.isArray(res) ? res : (res?.data || []);
+      this.recorridos = await this.recorridosService.getRecorridosLocales();
+      if (!this.recorridos.length) throw new Error('Sin datos locales');
     } catch (e: any) {
-      console.error('Error cargando historial:', e);
-      // FIX #7: si falla la API, intentar desde Supabase
       try {
-        this.recorridos = await this.recorridosService.getRecorridosLocales();
+        const res = await firstValueFrom(this.recorridosService.getRecorridos());
+        this.recorridos = Array.isArray(res) ? res : (res?.data || []);
       } catch {
-        this.error = true;
+        this.recorridos = [];
       }
     } finally {
       this.cargando = false;
@@ -46,16 +48,34 @@ export class HistorialPage implements OnInit {
   }
 
   duracion(r: Recorrido): string {
+    // Una ruta "programada" (guardada con el botón "Guardar ruta" pero
+    // nunca iniciada) no tiene duración — antes caía en la rama "En
+    // curso" porque tampoco tiene r.fin, dando a entender que un GPS
+    // estaba activo cuando en realidad nadie ha salido a recolectar.
+    if (r.estado === 'programada') return '—';
     if (!r.fin) return 'En curso';
-    const mins = Math.round(
-      (new Date(r.fin).getTime() - new Date(r.inicio).getTime()) / 60000
-    );
+    const finMs = new Date(r.fin).getTime();
+    const inicioMs = new Date(r.inicio).getTime();
+    if (isNaN(finMs) || isNaN(inicioMs)) return '—';
+    const mins = Math.round((finMs - inicioMs) / 60000);
     if (mins < 60) return `${mins} min`;
     return `${Math.floor(mins/60)}h ${mins%60}m`;
   }
 
+  // Un recorrido suspendido (caducidad) tiene fin_en igual que uno
+  // finalizado normalmente — sin esto se mostraría como "Completado".
+  // Una ruta "programada" tampoco tiene fin — sin distinguirla se
+  // mostraba como "En curso" (ver duracion()).
+  etiqueta(r: Recorrido): string {
+    if (r.estado === 'suspendido') return 'Suspendido';
+    if (r.estado === 'programada') return 'Programada';
+    return r.fin ? 'Completado' : 'En curso';
+  }
+
   fecha(iso: string): string {
-    return new Date(iso).toLocaleDateString('es-CO', {
+    const d = iso ? new Date(iso) : null;
+    if (!d || isNaN(d.getTime())) return 'Sin fecha';
+    return d.toLocaleDateString('es-CO', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });

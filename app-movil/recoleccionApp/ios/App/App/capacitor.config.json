@@ -12,6 +12,7 @@
 		"GeolocationPlugin",
 		"HapticsPlugin",
 		"KeyboardPlugin",
+		"LocalNotificationsPlugin",
 		"PreferencesPlugin",
 		"StatusBarPlugin",
 		"NativeBiometric"

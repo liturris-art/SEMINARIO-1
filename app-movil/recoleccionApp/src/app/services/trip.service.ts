@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
 
 @Injectable({
@@ -37,9 +38,11 @@ export class TripService {
     if (error) throw error;
   }
 
+  // El nombre del canal incluye trip_id para no compartir el mismo
+  // topic entre viajes distintos ni entre llamadas repetidas.
   listenToTrip(trip_id: string, callback: (data: Record<string, unknown>) => void) {
     return this.supabase
-      .channel('trip-realtime')
+      .channel(`trip-realtime-${trip_id}`)
       .on(
         'postgres_changes',
         {
@@ -51,5 +54,11 @@ export class TripService {
         (payload) => callback(payload.new as Record<string, unknown>),
       )
       .subscribe();
+  }
+
+  // Debe llamarse (con el canal devuelto por listenToTrip) al destruir
+  // el componente que escucha, para no acumular websockets abiertos.
+  stopListening(channel: RealtimeChannel) {
+    return this.supabase.removeChannel(channel);
   }
 }

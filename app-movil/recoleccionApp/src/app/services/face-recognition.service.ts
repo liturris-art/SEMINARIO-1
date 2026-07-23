@@ -22,6 +22,13 @@ export class FaceRecognitionService {
   private modelReady      = false;
   private scriptLoaded    = false;
 
+  // Serializa extraerLandmarks(): faceMesh.onResults() es un único
+  // callback compartido en la instancia de MediaPipe, así que dos
+  // llamadas concurrentes pueden pisarse el resultado entre sí. Encolar
+  // aquí garantiza que cada extracción termine antes de que empiece la
+  // siguiente.
+  private cola: Promise<unknown> = Promise.resolve();
+
   // ── Cargar MediaPipe desde CDN ────────────────────────────
   // Se inyecta como script en el DOM — esbuild nunca lo ve
   private async cargarScript(): Promise<void> {
@@ -70,6 +77,14 @@ export class FaceRecognitionService {
   async extraerLandmarks(base64: string): Promise<number[] | null> {
     await this.inicializar();
 
+    // Serializado: ver comentario de `cola`.
+    const tarea = () => this._extraerLandmarksInterno(base64);
+    const resultado = this.cola.then(tarea, tarea);
+    this.cola = resultado.then(() => undefined, () => undefined);
+    return resultado;
+  }
+
+  private _extraerLandmarksInterno(base64: string): Promise<number[] | null> {
     return new Promise((resolve) => {
       const img = new Image();
 
@@ -106,6 +121,86 @@ export class FaceRecognitionService {
     });
   }
 
+  // ── Análisis de un frame en vivo (para la guía de captura) ──
+  // A diferencia de extraerLandmarks() (que recibe una foto ya tomada),
+  // esto procesa un frame del <video> en vivo y además calcula qué tan
+  // grande y centrado está el rostro y qué tan iluminado está el frame —
+  // lo necesario para dar retroalimentación tipo "acércate"/"centra tu
+  // rostro" mientras la cámara está abierta, en vez de solo al final.
+  private canvasBrillo: HTMLCanvasElement | null = null;
+
+  async analizarFrame(source: HTMLCanvasElement | HTMLVideoElement): Promise<{
+    detectado:     boolean;
+    landmarksFlat: number[] | null;
+    anchoRostro:   number;  // 0–1, fracción del ancho del frame
+    centroX:       number;  // 0–1
+    centroY:       number;  // 0–1
+    brillo:        number;  // 0–255 aprox.
+  }> {
+    await this.inicializar();
+    const tarea = () => this._analizarFrameInterno(source);
+    const resultado = this.cola.then(tarea, tarea);
+    this.cola = resultado.then(() => undefined, () => undefined);
+    return resultado;
+  }
+
+  private async _analizarFrameInterno(source: HTMLCanvasElement | HTMLVideoElement) {
+    const ancho = (source as HTMLVideoElement).videoWidth  || (source as HTMLCanvasElement).width  || 640;
+    const alto  = (source as HTMLVideoElement).videoHeight || (source as HTMLCanvasElement).height || 480;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = ancho; canvas.height = alto;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(source, 0, 0, ancho, alto);
+
+    let landmarksFlat: number[] | null = null;
+    let anchoRostro = 0, centroX = 0.5, centroY = 0.5;
+
+    this.faceMesh.onResults((results: any) => {
+      if (results.multiFaceLandmarks?.length > 0) {
+        const landmarks = results.multiFaceLandmarks[0];
+        landmarksFlat = landmarks.flatMap((p: any) => [p.x, p.y, p.z]);
+        let minX = 1, maxX = 0, minY = 1, maxY = 0;
+        for (const p of landmarks) {
+          if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+          if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+        }
+        anchoRostro = maxX - minX;
+        centroX = (minX + maxX) / 2;
+        centroY = (minY + maxY) / 2;
+      }
+    });
+
+    try {
+      await this.faceMesh.send({ image: canvas });
+    } catch (e) {
+      console.error('Error analizando frame:', e);
+    }
+
+    return {
+      detectado: !!landmarksFlat,
+      landmarksFlat,
+      anchoRostro, centroX, centroY,
+      brillo: this.calcularBrillo(source, ancho, alto),
+    };
+  }
+
+  // Muestreo en un canvas pequeño (no el frame completo) — solo para
+  // estimar iluminación general, no necesita resolución alta.
+  private calcularBrillo(source: CanvasImageSource, anchoOrig: number, altoOrig: number): number {
+    if (!this.canvasBrillo) this.canvasBrillo = document.createElement('canvas');
+    const w = 40, h = Math.max(1, Math.round(40 * (altoOrig / anchoOrig)));
+    this.canvasBrillo.width = w; this.canvasBrillo.height = h;
+    const ctx = this.canvasBrillo.getContext('2d')!;
+    ctx.drawImage(source, 0, 0, w, h);
+    const { data } = ctx.getImageData(0, 0, w, h);
+    let suma = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      suma += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    }
+    return suma / (data.length / 4);
+  }
+
   // ── Guardar descriptor de referencia ─────────────────────
   async guardarDescriptorReferencia(landmarks: number[]): Promise<void> {
     await Preferences.set({
@@ -139,22 +234,12 @@ export class FaceRecognitionService {
     return 1 - similitud; // 0 = iguales, 2 = opuestos (en práctica 0-0.5)
   }
 
-  // ── Verificar identidad completa ──────────────────────────
+  // ── Verificar identidad completa (desde una foto en base64) ──
   async verificarIdentidad(base64Actual: string): Promise<{
     verificado: boolean;
     confianza:  number;
     error:      string | null;
   }> {
-    // 1. Verificar que hay referencia guardada
-    const referencia = await this.cargarDescriptorReferencia();
-    if (!referencia) {
-      return {
-        verificado: false, confianza: 0,
-        error: 'No hay foto de referencia. Debes registrarte con foto primero.',
-      };
-    }
-
-    // 2. Extraer landmarks de la foto actual
     let actual: number[] | null;
     try {
       actual = await this.extraerLandmarks(base64Actual);
@@ -164,15 +249,31 @@ export class FaceRecognitionService {
         error: 'Error al procesar la imagen. Intenta de nuevo.',
       };
     }
-
     if (!actual) {
       return {
         verificado: false, confianza: 0,
         error: 'No se detectó ningún rostro. Mira de frente con buena iluminación.',
       };
     }
+    return this.verificarIdentidadConLandmarks(actual);
+  }
 
-    // 3. Comparar
+  // ── Verificar identidad a partir de landmarks ya extraídos ──
+  // Usada por FaceScanComponent: el escaneo en vivo ya corrió MediaPipe
+  // sobre el frame capturado, así que no hace falta volver a procesarlo.
+  async verificarIdentidadConLandmarks(actual: number[]): Promise<{
+    verificado: boolean;
+    confianza:  number;
+    error:      string | null;
+  }> {
+    const referencia = await this.cargarDescriptorReferencia();
+    if (!referencia) {
+      return {
+        verificado: false, confianza: 0,
+        error: 'No hay foto de referencia. Debes registrarte con foto primero.',
+      };
+    }
+
     const distancia = this.cosineSimilarity(referencia, actual);
     const confianza = Math.max(0, Math.round((1 - distancia / 0.5) * 100));
     const verificado = distancia < SIMILARITY_THRESHOLD;

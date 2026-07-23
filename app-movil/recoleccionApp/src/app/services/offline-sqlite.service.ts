@@ -28,89 +28,122 @@ export interface PuntoOffline {
 @Injectable({ providedIn: 'root' })
 export class OfflineSqliteService {
 
+  // ── Serialización de operaciones ──────────────────────────
+  // Todas las operaciones de SQLite comparten una sola conexión con
+  // nombre fijo ('cleanroute_offline'). Si dos llamadas se solapan
+  // (p. ej. varios fixes de GPS seguidos), abrir la conexión por
+  // segunda vez antes de que la primera se cierre lanza un error del
+  // plugin — y ese error dejaba la conexión huérfana porque el close
+  // solo corría en el camino feliz. Encolar aquí garantiza que las
+  // llamadas se ejecuten una a la vez.
+  private cola: Promise<unknown> = Promise.resolve();
+
+  private encolar<T>(tarea: () => Promise<T>): Promise<T> {
+    const resultado = this.cola.then(tarea, tarea);
+    this.cola = resultado.then(() => undefined, () => undefined);
+    return resultado;
+  }
+
   // ── Inicialización de la BD ───────────────────────────────
   // Se llama una vez al arrancar la app (desde AppComponent.initializeApp).
   // Crea la tabla si no existe.
   async init(): Promise<void> {
-    try {
-      // Importación dinámica para evitar errores si el plugin no está instalado
-      const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
-      const sqlite = new SQLiteConnection(CapacitorSQLite);
+    return this.encolar(async () => {
+      try {
+        // Importación dinámica para evitar errores si el plugin no está instalado
+        const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
+        const sqlite = new SQLiteConnection(CapacitorSQLite);
+        const db     = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
 
-      const db = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
-      await db.open();
+        try {
+          await db.open();
+          await db.execute(`
+            CREATE TABLE IF NOT EXISTS puntos_offline (
+              id          INTEGER PRIMARY KEY AUTOINCREMENT,
+              recorridoId TEXT    NOT NULL,
+              lat         REAL    NOT NULL,
+              lon         REAL    NOT NULL,
+              foto        TEXT,
+              timestamp   INTEGER NOT NULL
+            );
+          `);
+        } finally {
+          await sqlite.closeConnection('cleanroute_offline', false);
+        }
 
-      await db.execute(`
-        CREATE TABLE IF NOT EXISTS puntos_offline (
-          id          INTEGER PRIMARY KEY AUTOINCREMENT,
-          recorridoId TEXT    NOT NULL,
-          lat         REAL    NOT NULL,
-          lon         REAL    NOT NULL,
-          foto        TEXT,
-          timestamp   INTEGER NOT NULL
-        );
-      `);
-
-      await sqlite.closeConnection('cleanroute_offline', false);
-      console.log('✅ SQLite inicializado correctamente');
-    } catch (e) {
-      // Si SQLite no está disponible (web/emulador sin plugin),
-      // caemos silenciosamente a Preferences como fallback.
-      console.warn('SQLite no disponible, usando Preferences como fallback:', e);
-    }
+        console.log('✅ SQLite inicializado correctamente');
+      } catch (e) {
+        // Si SQLite no está disponible (web/emulador sin plugin),
+        // caemos silenciosamente a Preferences como fallback.
+        console.warn('SQLite no disponible, usando Preferences como fallback:', e);
+      }
+    });
   }
 
   // ── Guardar un punto GPS (con foto opcional) ─────────────
   async guardar(punto: PuntoOffline): Promise<void> {
-    try {
-      const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
-      const sqlite = new SQLiteConnection(CapacitorSQLite);
-      const db     = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
-      await db.open();
+    return this.encolar(async () => {
+      try {
+        const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
+        const sqlite = new SQLiteConnection(CapacitorSQLite);
+        const db     = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
 
-      await db.run(
-        `INSERT INTO puntos_offline (recorridoId, lat, lon, foto, timestamp)
-         VALUES (?, ?, ?, ?, ?)`,
-        [punto.recorridoId, punto.lat, punto.lon, punto.foto ?? null, punto.timestamp],
-      );
-
-      await sqlite.closeConnection('cleanroute_offline', false);
-    } catch {
-      // Fallback a Preferences
-      await this._guardarEnPreferences(punto);
-    }
+        try {
+          await db.open();
+          await db.run(
+            `INSERT INTO puntos_offline (recorridoId, lat, lon, foto, timestamp)
+             VALUES (?, ?, ?, ?, ?)`,
+            [punto.recorridoId, punto.lat, punto.lon, punto.foto ?? null, punto.timestamp],
+          );
+        } finally {
+          await sqlite.closeConnection('cleanroute_offline', false);
+        }
+      } catch {
+        // Fallback a Preferences
+        await this._guardarEnPreferences(punto);
+      }
+    });
   }
 
   // ── Leer todos los puntos pendientes de sincronizar ───────
   async obtenerTodos(): Promise<PuntoOffline[]> {
-    try {
-      const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
-      const sqlite = new SQLiteConnection(CapacitorSQLite);
-      const db     = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
-      await db.open();
+    return this.encolar(async () => {
+      try {
+        const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
+        const sqlite = new SQLiteConnection(CapacitorSQLite);
+        const db     = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
 
-      const res = await db.query('SELECT * FROM puntos_offline ORDER BY timestamp ASC');
-      await sqlite.closeConnection('cleanroute_offline', false);
-
-      return (res.values ?? []) as PuntoOffline[];
-    } catch {
-      return await this._leerDePreferences();
-    }
+        try {
+          await db.open();
+          const res = await db.query('SELECT * FROM puntos_offline ORDER BY timestamp ASC');
+          return (res.values ?? []) as PuntoOffline[];
+        } finally {
+          await sqlite.closeConnection('cleanroute_offline', false);
+        }
+      } catch {
+        return await this._leerDePreferences();
+      }
+    });
   }
 
   // ── Eliminar todos los registros (tras sincronización OK) ─
   async limpiar(): Promise<void> {
-    try {
-      const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
-      const sqlite = new SQLiteConnection(CapacitorSQLite);
-      const db     = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
-      await db.open();
+    return this.encolar(async () => {
+      try {
+        const { CapacitorSQLite, SQLiteConnection } = await import('@capacitor-community/sqlite') as any;
+        const sqlite = new SQLiteConnection(CapacitorSQLite);
+        const db     = await sqlite.createConnection('cleanroute_offline', false, 'no-encryption', 1, false);
 
-      await db.execute('DELETE FROM puntos_offline');
-      await sqlite.closeConnection('cleanroute_offline', false);
-    } catch {
-      await Preferences.remove({ key: 'datosOffline' });
-    }
+        try {
+          await db.open();
+          await db.execute('DELETE FROM puntos_offline');
+        } finally {
+          await sqlite.closeConnection('cleanroute_offline', false);
+        }
+      } catch {
+        await Preferences.remove({ key: 'datosOffline' });
+      }
+    });
   }
 
   // ── Contar registros pendientes ───────────────────────────

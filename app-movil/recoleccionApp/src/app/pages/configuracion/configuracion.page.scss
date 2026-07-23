@@ -145,13 +145,67 @@
   &.gray   { background: linear-gradient(135deg, #90a4ae, #607d8b); }
 }
 
+// ── Interruptor (checkbox estilizado) ─────────────────────
+// No se usa <ion-toggle>: en algunos WebView de Android el shadow DOM
+// del componente no se renderizaba (la fila aparecía sin el control),
+// aunque en navegador de escritorio funcionaba bien. Un checkbox nativo
+// estilizado no depende de eso y se ve igual en ambos lados.
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+}
+
+.switch .slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background-color: #e0e0e0;
+  border-radius: 26px;
+  transition: background-color 0.2s ease;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    bottom: 3px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+  }
+}
+
+.switch input:checked + .slider {
+  background-color: #22c55e;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
 // ── Select ────────────────────────────────────────────────
-.cfg-select {
+.cfg-select-native {
   font-size: 14px;
   font-weight: 500;
   color: #e91e63;
-  max-width: 70px;
+  max-width: 80px;
   text-align: right;
+  border: none;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 4px;
 }
 
 // ── Badge de versión ──────────────────────────────────────
@@ -168,6 +222,35 @@
 // ── Botón cerrar sesión ───────────────────────────────────
 .logout-wrap {
   padding: 20px 16px 48px;
+}
+
+// ── Overlay "Cerrando sesión" ─────────────────────────────
+// HTML/CSS puro a propósito — ver comentario en cerrarSesion().
+.cerrando-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 9999;
+
+  p { color: #666; font-size: 14px; margin: 0; }
+}
+
+.cerrando-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f8bbd0;
+  border-top-color: #e91e63;
+  border-radius: 50%;
+  animation: cerrandoSpin 0.8s linear infinite;
+}
+
+@keyframes cerrandoSpin {
+  to { transform: rotate(360deg); }
 }
 
 .logout-btn {

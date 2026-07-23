@@ -20,7 +20,7 @@
 }
 
 // ── Mapa ─────────────────────────────────────────────────
-#map {
+.map-container {
   width: 100%;
   height: 480px;
   display: block;
@@ -162,7 +162,24 @@
   font-weight: 500;
   color: #E91E63;
   box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+  max-width: calc(100vw - 24px);
   ion-icon { font-size: 16px; }
+
+  .ruta-nombre-input {
+    width: 110px;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: rgba(0,0,0,0.05);
+    border-radius: 12px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+
+    &::placeholder { color: #999; }
+    &:disabled { opacity: 0.6; }
+  }
 }
 
 // ── HUD velocímetro ───────────────────────────────────────

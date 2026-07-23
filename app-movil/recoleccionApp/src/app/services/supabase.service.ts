@@ -13,6 +13,16 @@ export class SupabaseService {
     this.supabase = createClient(
       environment.supabaseUrl,
       environment.supabaseAnonKey,
+      {
+        auth: {
+          persistSession:    true,
+          autoRefreshToken:  true,
+          // No hay flujo de OAuth por URL en una app Capacitor — dejar esto
+          // en true (su default) hace que intente leer window.location al
+          // iniciar, innecesario aquí y evitable.
+          detectSessionInUrl: false,
+        },
+      },
     );
   }
 
