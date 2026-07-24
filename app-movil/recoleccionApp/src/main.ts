@@ -49,7 +49,7 @@ import {
 
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
-import { scanOutline, sunnyOutline, eyeOutline, removeCircleOutline } from 'ionicons/icons';
+import { scanOutline, sunnyOutline, eyeOutline, removeCircleOutline, leafOutline } from 'ionicons/icons';
 addIcons({
   'arrow-back-outline':         arrowBackOutline,
   'arrow-forward-outline':      arrowForwardOutline,
@@ -119,6 +119,7 @@ addIcons({
 'sunny-outline':          sunnyOutline,
 'eye-outline':            eyeOutline,
 'remove-circle-outline':  removeCircleOutline,
+'leaf-outline':           leafOutline,
 });
 
 bootstrapApplication(AppComponent, {

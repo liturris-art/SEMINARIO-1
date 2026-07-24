@@ -1,16 +1,22 @@
 import { Component } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { App } from '@capacitor/app';
 import { Preferences } from '@capacitor/preferences';
-import { IonApp, IonRouterOutlet, AlertController, ToastController } from '@ionic/angular/standalone';
+import { AnimationBuilder, IonApp, IonRouterOutlet, AlertController, ToastController } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service';
 import { SupabaseService } from './services/supabase.service';
 import { OfflineSqliteService } from './services/offline-sqlite.service';
 import { filter } from 'rxjs/operators';
 import { conTimeout } from './utils/con-timeout';
+import { pageTransition } from './animations/page-transition';
+
+// Tramo donde se usa la transición personalizada (ver
+// animations/page-transition.ts) — el resto de la app sigue con la
+// animación por defecto de Ionic, que ya se veía bien.
+const TRAMO_ANIMADO: [string, string] = ['/bienvenida', '/login'];
 
 // Rutas donde el botón atrás debe cerrar la app en vez de navegar
-const RUTAS_RAIZ = ['/home', '/menu', '/login'];
+const RUTAS_RAIZ = ['/bienvenida', '/home', '/menu', '/login'];
 
 // ── Caducidad de sesión por inactividad ──────────────────────
 // Antes la sesión de Supabase se quedaba abierta para siempre: cerrar y
@@ -32,6 +38,11 @@ export class AppComponent {
 
   private historialRutas: string[] = [];
 
+  // Solo se activa para el tramo bienvenida↔login; en cualquier otra
+  // navegación queda undefined y el router-outlet usa la animación
+  // por defecto de Ionic (la que ya estaba y se veía bien).
+  bienvenidaAnimation?: AnimationBuilder;
+
   constructor(
     private authService:   AuthService,
     private supabaseService: SupabaseService,
@@ -45,6 +56,20 @@ export class AppComponent {
     this.rastrearHistorial();
     this.manejarBotonAtras();
     this.rastrearInactividad();
+    this.rastrearAnimacionBienvenida();
+  }
+
+  // ── Animación solo para bienvenida↔login ──────────────────
+  private rastrearAnimacionBienvenida() {
+    this.router.events.pipe(
+      filter((e): e is NavigationStart => e instanceof NavigationStart),
+    ).subscribe(e => {
+      const desde = this.router.url;
+      const hacia = e.url;
+      const esTramoAnimado =
+        (TRAMO_ANIMADO.includes(desde) && TRAMO_ANIMADO.includes(hacia)) && desde !== hacia;
+      this.bienvenidaAnimation = esTramoAnimado ? pageTransition : undefined;
+    });
   }
 
   // ── Caducidad de sesión ───────────────────────────────────
@@ -191,15 +216,12 @@ export class AppComponent {
       // único momento para revisar la caducidad es este.
       await this.verificarExpiracionSesion();
 
-      // FIX #4: no redirigir a login — dejar que las rutas decidan
-      // El ciudadano entra directo, el conductor ve el home y puede
-      // usar las funciones públicas del mapa sin autenticarse.
-      const isLogged = await conTimeout(this.authService.isLoggedIn(), 6000, false);
-      if (!isLogged) {
-        // Solo redirigir a home (vista pública), NO a login
-        const url = this.router.url;
-        if (!url || url === '/') this.router.navigate(['/home']);
-      }
+      // FIX #4: no redirigir a login — dejar que las rutas decidan.
+      // La pantalla de bienvenida es la raíz para ambos casos (ver
+      // app.routes.ts); esto es solo un respaldo por si el router no
+      // navegó solo desde '/' al arrancar en frío.
+      const url = this.router.url;
+      if (!url || url === '/') this.router.navigate(['/bienvenida']);
     } catch (e) {
       console.error('Error en initializeApp:', e);
     }

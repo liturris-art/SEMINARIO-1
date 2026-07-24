@@ -1,0 +1,98 @@
+.bienvenida-content {
+  // Mismo color primario que el resto de la app (--ion-color-primary,
+  // definido en theme/variables.scss) — antes usaba un verde que no
+  // aparece en ninguna otra pantalla.
+  --background: linear-gradient(160deg, #e91e63 0%, #c2185b 55%, #8e0f45 100%);
+}
+
+.bienvenida-wrap {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.bienvenida-hero {
+  margin-bottom: 48px;
+}
+
+.logo-badge {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 20px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 46px;
+    color: #ffffff;
+  }
+}
+
+.app-name {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+
+.app-tagline {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 auto;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+.bienvenida-features {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 48px;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 12px 16px;
+  text-align: left;
+
+  ion-icon {
+    font-size: 22px;
+    color: #ffffff;
+    flex: none;
+  }
+
+  span {
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 500;
+  }
+}
+
+.btn-comenzar {
+  width: 100%;
+  max-width: 320px;
+  --background: #ffffff;
+  --color: #c2185b;
+  --border-radius: 14px;
+  --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  height: 52px;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: none;
+}

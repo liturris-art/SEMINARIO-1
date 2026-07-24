@@ -3,10 +3,11 @@ import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
 
-  // ── RAÍZ → home enruta según el rol ────────────────────────
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  // ── RAÍZ → pantalla de bienvenida siempre primero ────────────
+  { path: '', redirectTo: 'bienvenida', pathMatch: 'full' },
 
   // ── PÚBLICAS ────────────────────────────────────────────────
+  { path: 'bienvenida',      loadComponent: () => import('./pages/bienvenida/bienvenida.page').then(m => m.BienvenidaPage) },
   { path: 'login',           loadComponent: () => import('./pages/login/login.page').then(m => m.LoginPage) },
   { path: 'register',        loadComponent: () => import('./pages/register/register.page').then(m => m.RegisterPage) },
   { path: 'forgot-password', loadComponent: () => import('./pages/forgot-password/forgot-password.page').then(m => m.ForgotPasswordPage) },

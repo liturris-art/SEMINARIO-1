@@ -1,0 +1,33 @@
+<ion-content [fullscreen]="true" class="bienvenida-content">
+  <div class="bienvenida-wrap">
+
+    <div class="bienvenida-hero">
+      <div class="logo-badge">
+        <ion-icon name="leaf-outline"></ion-icon>
+      </div>
+      <h1 class="app-name">CleanRoute</h1>
+      <p class="app-tagline">Gestión inteligente de rutas de recolección de residuos</p>
+    </div>
+
+    <div class="bienvenida-features">
+      <div class="feature">
+        <ion-icon name="map-outline"></ion-icon>
+        <span>Sigue el camión en tiempo real</span>
+      </div>
+      <div class="feature">
+        <ion-icon name="navigate-circle-outline"></ion-icon>
+        <span>Rutas y recorridos optimizados</span>
+      </div>
+      <div class="feature">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        <span>Verificación de identidad del conductor</span>
+      </div>
+    </div>
+
+    <ion-button expand="block" class="btn-comenzar" (click)="comenzar()">
+      Comenzar
+      <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+    </ion-button>
+
+  </div>
+</ion-content>
